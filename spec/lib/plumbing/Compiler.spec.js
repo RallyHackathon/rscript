@@ -31,7 +31,6 @@ describe('Compiler', function() {
 		});
 
 		it('should include everything from the environment no matter what it is', function() {
-			debugger;
 			var env = {
 				foo: undefined,
 				bar: null,

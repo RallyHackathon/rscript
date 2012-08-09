@@ -19,17 +19,31 @@ rsc.launch = function(varargs) {
 
 
 
-rsc.stack = function(configOrChild, childrenOrUndefined) {
+rsc.flow = function(configOrChild, varargs) {
+	var children = Ext.Array.toArray(arguments);
+	var config;
+
+	if(configOrChild && !configOrChild.isRscPromise) {
+		config = configOrChild;
+		children = Ext.Array.remove(children, config);
+	} else {
+		config = {};
+	} 
+	config.layout = 'column';
+	
+	var args = [config].concat(children);
+	return rsc.stack.apply(rsc.stack, args);
+};
+
+
+rsc.stack = function(configOrChild, varargs) {
 	var container;
-	var children = [];
+	var children = Ext.Array.toArray(arguments);
 	var config = {};
 
-	if(configOrChild && configOrChild.isRscPromise) {
-		children.push(configOrChild);
-		children = Ext.Array.merge(children, childrenOrUndefined || []);
-	} else if(configOrChild) {
+	if(configOrChild && !configOrChild.isRscPromise) {
 		config = configOrChild;
-		children = childrenOrUndefined || [];
+		children = Ext.Array.remove(children, config);
 	}
 
 	var promise = new rsc.Promise(function(parentContainer) {
@@ -38,6 +52,10 @@ rsc.stack = function(configOrChild, childrenOrUndefined) {
 		}, config);
 
 		container = parentContainer.add(config);
+
+		Ext.Array.each(children, function(child) {
+			child.resolve(container);
+		});
 	});
 
 	return promise;
@@ -105,6 +123,7 @@ rsc.Compiler.prototype = {
 
 rsc.Promise = function(resolve) {
 	this.resolve = resolve;
+	this.isRscPromise = true;
 };
 
 

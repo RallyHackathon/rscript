@@ -5,8 +5,12 @@
 	<script type="text/javascript" src="../lib_min/rscript.debug.js"></script>
 
 	<script type="rscript">
-		var t = text(14, "hello rscript!");
-		launch(t);
+		var t = text(34, "hello rscript!");
+		var t2 = text('more text here');
+		var t3 = text('and yet some more');
+		var t4 = text('im over here');
+
+		launch(flow(stack(t, t2, t3), t4));
 	</script>
 
 </head>
