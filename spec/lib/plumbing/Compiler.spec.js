@@ -31,6 +31,7 @@ describe('Compiler', function() {
 		});
 
 		it('should include everything from the environment no matter what it is', function() {
+			debugger;
 			var env = {
 				foo: undefined,
 				bar: null,
@@ -43,7 +44,7 @@ describe('Compiler', function() {
 
 			var result = compiler.compile('').toString();
 
-			_.each(env, function(value, key) {
+			Ext.Object.each(env, function(key, value) {
 				expect(result.indexOf(key) > -1).toBe(true);
 			});
 		});
