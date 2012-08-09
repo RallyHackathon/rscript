@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>testing</title>
+</head>
+<body>
+	executing rscript
+	<script type="text/rscript">
+		doIt();
+		alert(typeof window.doIt);
+	</script>
+
+	<script type="text/javascript">
+		var e = {
+			doIt: function() {
+				alert('sweet');
+			}
+		};
+
+		function getSrc() {
+			var scripts = document.getElementsByTagName('script');
+			for(var i = 0; i < scripts.length; ++i) {
+				if(scripts[i].type === 'text/rscript') {
+					return scripts[i].innerText;
+				}
+			}
+		}
+
+		var src = getSrc();
+
+		if(src) {
+			var func = 'e.execute = function(doIt) {' + src + '}';
+			eval(func);
+			e.execute(e.doIt);
+		}
+	</script>
+</body>
+</html>
+
