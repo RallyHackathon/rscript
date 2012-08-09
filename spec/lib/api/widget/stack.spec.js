@@ -19,7 +19,7 @@ describe('stack()', function() {
 
 	describe('invoking', function() {
 		it('should not blow up with no parameters', function() {
-			var s = rsc.stack();
+			var s = rsc.api.stack();
 
 			s.resolve(rootContainer);
 
@@ -37,7 +37,7 @@ describe('stack()', function() {
 				foo: 'bar'
 			};
 
-			var s = rsc.stack(options);
+			var s = rsc.api.stack(options);
 
 			s.resolve(rootContainer);
 
@@ -53,10 +53,10 @@ describe('stack()', function() {
 			var child1Text = 'child1';
 			var child2Text = 'child2';
 
-			var child1 = rsc.text(child1Text);
-			var child2 = rsc.text(child2Text);
+			var child1 = rsc.api.text(child1Text);
+			var child2 = rsc.api.text(child2Text);
 
-			var s = rsc.stack(child1, child2);
+			var s = rsc.api.stack(child1, child2);
 
 			s.resolve(rootContainer);
 

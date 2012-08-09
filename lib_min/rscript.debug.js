@@ -1,9 +1,11 @@
 (function() {
 	this.rsc = this.rsc || {};
+	this.rsc.api = this.rsc.api || {};
+
 	this.rsc.global = this;
 })();
 
-rsc.launch = function(varargs) {
+rsc.api.launch = function(varargs) {
 	var items = Ext.Array.toArray(arguments);
 
 	var rootContainer = Ext.widget('container', {
@@ -19,7 +21,7 @@ rsc.launch = function(varargs) {
 
 
 
-rsc.flow = function(configOrChild, varargs) {
+rsc.api.flow = function(configOrChild, varargs) {
 	var children = Ext.Array.toArray(arguments);
 	var config;
 
@@ -32,11 +34,11 @@ rsc.flow = function(configOrChild, varargs) {
 	config.layout = 'column';
 	
 	var args = [config].concat(children);
-	return rsc.stack.apply(rsc.stack, args);
+	return rsc.api.stack.apply(rsc.stack, args);
 };
 
 
-rsc.stack = function(configOrChild, varargs) {
+rsc.api.stack = function(configOrChild, varargs) {
 	var container;
 	var children = Ext.Array.toArray(arguments);
 	var config = {};
@@ -70,7 +72,7 @@ rsc.stack = function(configOrChild, varargs) {
 };
 
 
-rsc.text = function(sizeOrText, textOrUndefined) {
+rsc.api.text = function(sizeOrText, textOrUndefined) {
 	var container;
 	var text = Ext.isString(sizeOrText) ? sizeOrText : (textOrUndefined || '');
 	var size = Ext.isNumber(sizeOrText) ? sizeOrText : 12;
@@ -158,7 +160,7 @@ rsc.Promise = function(resolve) {
 		var src = findSrc();
 
 		if(src) {
-			new rsc.Compiler(rsc).execute(src);
+			new rsc.Compiler(rsc.api).execute(src);
 		}
 	});
 })();

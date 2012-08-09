@@ -10,7 +10,7 @@ describe('text()', function() {
 	});
 
 	it('should not blow up with no parameters', function() {
-		var t = rsc.text();
+		var t = rsc.api.text();
 
 		t.resolve(mockContainer);
 
@@ -24,7 +24,7 @@ describe('text()', function() {
 
 	it('should accept just a size parameter', function() {
 		var size = 20;
-		var t = rsc.text(size);
+		var t = rsc.api.text(size);
 
 		t.resolve(mockContainer);
 
@@ -35,7 +35,7 @@ describe('text()', function() {
 
 	it('should accept just a text parameter', function() {
 		var text = 'hello';
-		var t = rsc.text(text);
+		var t = rsc.api.text(text);
 
 		t.resolve(mockContainer);
 
@@ -49,7 +49,7 @@ describe('text()', function() {
 		var size = 40;
 		var text = 'big text';
 
-		var t = rsc.text(size, text);
+		var t = rsc.api.text(size, text);
 
 		t.resolve(mockContainer);
 
