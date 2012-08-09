@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>promise spike</title>
+	<script type="text/javascript" charset="utf-8" src="http://cdn.sencha.io/ext-4.1.1-gpl/ext-all.js"></script>
+	<link rel="stylesheet" href="http://cdn.sencha.io/ext-4.1.1-gpl/resources/css/ext-all.css" />
+</head>
+<body>
+	promise spike
+
+	<script type="text/javascript">
+		function Promise(resolve) {
+			this.resolve = resolve || function() {};
+		}
+
+		function panel(html) {
+			var panel;
+			var promise = new Promise(function(container) {
+				panel = container.add({
+					xtype: 'panel',
+					html: html
+				});
+			});
+
+			Object.defineProperty(promise, 'html', {
+				get: function() {
+					return panel.getHtml()
+				}
+			});
+			return promise;
+		}
+
+		function stack(varargs) {
+			var args = Ext.Array.toArray(arguments);
+
+			var container;
+			var promise = new Promise(function(parentContainer) {
+				container = parentContainer.add({
+					xtype: 'container'
+				});
+
+				Ext.Array.forEach(args, function(arg) {
+					arg.resolve(container);
+				});
+			});
+
+			return promise;
+		}
+
+		function R(builder) {
+			Ext.onReady(function() {
+				var root = builder();
+				var container = Ext.widget('container', { width: '100%', height: '100%', renderTo: Ext.getBody() });
+				root.resolve(container);
+			});
+		}
+
+		R(function() {
+			var p1 = panel('promises work');
+			var p2 = panel('yup');
+			var p3 = panel('they do');
+
+			return stack(p1, p2, p3);
+		});
+
+	</script>
+</body>
+</html>
+
+

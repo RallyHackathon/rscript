@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>promise spike</title>
+	<script type="text/javascript" charset="utf-8" src="http://cdn.sencha.io/ext-4.1.1-gpl/ext-all.js"></script>
+	<link rel="stylesheet" href="http://cdn.sencha.io/ext-4.1.1-gpl/resources/css/ext-all.css" />
+</head>
+<body>
+	promise spike
+
+	<script type="text/javascript">
+		window.R = {};
+
+		R.Promise = function Promise(resolve) {
+			this.resolve = resolve || function() {};
+		};
+
+		R.panel = function panel(html) {
+			var panel;
+			var promise = new R.Promise(function(container) {
+				panel = container.add({
+					xtype: 'panel',
+					html: html
+				});
+			});
+
+			Object.defineProperty(promise, 'html', {
+				get: function() {
+					return panel.getHtml()
+				}
+			});
+			return promise;
+		};
+
+		R.stack = function stack(varargs) {
+			var args = Ext.Array.toArray(arguments);
+
+			var container;
+			var promise = new R.Promise(function(parentContainer) {
+				container = parentContainer.add({
+					xtype: 'container'
+				});
+
+				Ext.Array.forEach(args, function(arg) {
+					arg.resolve(container);
+				});
+			});
+
+			return promise;
+		};
+
+		R.build = function(items) {
+			Ext.onReady(function() {
+				if(Ext.isObject(items)) {
+					items = [items];
+				}
+
+				var container = Ext.widget('container', { width: '100%', height: '100%', renderTo: Ext.getBody() });
+				Ext.Array.forEach(items, function(item) {
+					item.resolve(container);
+				});
+			});
+		}
+	</script>
+	<script type="text/rscript">
+		var p1 = panel('promises work');
+		var p2 = panel('yup');
+		var p3 = panel('they do');
+		var p4 = panel('annnnnnd in rscript!');
+
+		launch([p1, p2, p3, p4]);
+	</script>
+
+	<script type="text/javascript">
+		function getSrc() {
+			var scripts = document.getElementsByTagName('script');
+			for(var i = 0; i < scripts.length; ++i) {
+				if(scripts[i].type === 'text/rscript') {
+					return scripts[i].innerText;
+				}
+			}
+		}
+
+		var src = getSrc();
+		
+		if(src) {
+			var userFuncEval = 'R.userFunc = function(panel, launch) {' + src + '}';
+			eval(userFuncEval);
+
+			R.userFunc(R.panel, R.build);
+		}
+	</script>
+
+</body>
+</html>
+
+
+
