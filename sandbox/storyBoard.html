@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<script type="text/javascript" src="https://test7cluster.rallydev.com/apps/2.0p3/sdk-debug.js"></script>
+	<script type="text/javascript" src="../lib_min/rscript.debug.js"></script>
+
+	<script type="rscript">
+		var stack = stack();
+		var cardboard = cardboard('UserStory', 'ScheduleState');
+		var addNew = addNew(['UserStory', 'Defect'], ['Name', 'Schedule State']);
+		var combobox = iterationCombobox();
+
+		combobox.ready = function() {
+			cardboard.filter = combobox.filter;
+			stack.add(addNew);
+			stack.add(cardboard);
+		};
+
+		combobox.change = function() {
+			cardboard.filter = combobox.filter;
+		};
+
+		stack.add(combobox);
+
+		addNew.beforerecordadd = function(record) {
+			record.iteration = comobox.ref;
+		};
+
+		addNew.recordadd = cardboard.refresh;
+
+		launch(stack);
+	</script>
+
+</head>
+<body>
+</body>
+</html>
+
+

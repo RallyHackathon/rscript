@@ -38,6 +38,153 @@ rsc.api.flow = function(configOrChild, varargs) {
 };
 
 
+rsc.api.addNew = function(types, varargs_ignoredFields) {
+	var addNew;
+	var ignored = Ext.Array.toArray(arguments);
+	ignored = Ext.Array.remove(ignored, types);
+
+	if(Ext.isObject(types)) {
+		types = [types];
+	}
+
+	var promise = new rsc.Promise(function(container) {
+		addNew = container.add({
+			xtype: 'rallyaddnew',
+			recordTypes: types,
+			ignoredRequiredFields: ignored,
+			showAddWithDetails: false
+		});
+
+		Ext.Object.each(promise.pending, function(key, value) {
+			addNew.on(key, value);
+		});
+		promise.pending = {};
+	});
+
+	promise.pending = {};
+
+	Object.defineProperty(promise, 'beforerecordadd', {
+		set: function(callback) {
+			if(addNew) {
+				addNew.on('beforerecordadd', callback);
+			} else {
+				this.pending.beforerecordadd = callback;
+			}
+		}
+	});
+
+	Object.defineProperty(promise, 'recordadd', {
+		set: function(callback) {
+			if(addNew) {
+				addNew.on('recordadd', callback);
+			} else {
+				this.pending.recordadd = callback;
+			}
+		}
+	});
+
+	return promise;
+};
+
+
+
+rsc.api.cardboard = function(type, attribute) {
+	var cardboard;
+
+	var promise = new rsc.Promise(function(container) {
+		var config = {
+			xtype: 'rallycardboard',
+			types: [type],
+			attribute: attribute
+		};
+
+		if(promise.pending.filter) {
+			config.storeConfig = {
+				filters: [promise.pending.filter]
+			};
+			delete promise.pending.filter;
+		}
+
+		cardboard = container.add(config);
+	});
+
+	promise.pending = {};
+
+	Object.defineProperty(promise, 'filter', {
+		set: function(f) {
+			if(cardboard) {
+				cardboard.refresh({
+					storeConfig: {
+						filters: [f]
+					}
+				});
+			} else {
+				promise.pending.filter = f;
+			}
+		}
+	});
+
+	return promise;
+};
+
+
+rsc.api.iterationCombobox = function() {
+	var combobox;
+
+	var promise = new rsc.Promise(function(container) {
+		combobox = container.add({
+			xtype: 'rallyiterationcombobox'
+		});
+
+		Ext.Object.each(promise.pending, function(key, value) {
+			combobox.on(key, value);
+		});
+		promise.pending = {};
+	});
+
+	promise.pending = {};
+
+	Object.defineProperty(promise, 'value', {
+		get: function() {
+			return combobox && combobox.getDisplayValue();
+		}
+	});
+
+	Object.defineProperty(promise, 'ref', {
+		get : function() {
+			return combobox && combobox.getValue();
+		}
+	});
+
+	Object.defineProperty(promise, 'filter', {
+		get: function() {
+			return combobox && combobox.getQueryFromSelected();
+		}
+	});
+
+	Object.defineProperty(promise, 'ready', {
+		set: function(callback) {
+			if(combobox) {
+				combobox.on('ready', callback);
+			} else {
+				this.pending.ready = callback
+			}
+		}
+	});
+
+	Object.defineProperty(promise, 'change', {
+		set: function(callback) {
+			if(combobox) {
+				combobox.on('change', callback);
+			} else {
+				this.pending.change = callback;
+			}
+		}
+	});
+
+	return promise;
+};
+
 rsc.api.stack = function(configOrChild, varargs) {
 	var container;
 	var children = Ext.Array.toArray(arguments);
@@ -140,6 +287,14 @@ rsc.Promise = function(resolve) {
 
 
 (function() {
+	function patchSdk() {
+
+		// addnew is calling this, not available in RUI
+		Rally.getContextPath = function() {
+			return 'https://test7cluster.rallydev.com/slm'
+		};
+	}
+
 	function findSrc() {
 		var scripts = document.getElementsByTagName('script');
 
@@ -157,6 +312,8 @@ rsc.Promise = function(resolve) {
 
 
 	Rally.onReady(function() {
+		patchSdk();
+
 		var src = findSrc();
 
 		if(src) {
