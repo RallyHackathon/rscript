@@ -3,6 +3,66 @@
 	this.rsc.global = this;
 })();
 
+rsc.launch = function(varargs) {
+	var items = Ext.Array.toArray(arguments);
+
+	var rootContainer = Ext.widget('container', {
+		renderTo: Ext.getBody(),
+		width: '100%',
+		height: '100%'
+	});
+
+	Ext.Array.each(items, function(item) {
+		item.resolve(rootContainer);
+	});
+};
+
+
+
+rsc.stack = function(configOrChild, childrenOrUndefined) {
+	var container;
+	var children = [];
+	var config = {};
+
+	if(configOrChild && configOrChild.isRscPromise) {
+		children.push(configOrChild);
+		children = Ext.Array.merge(children, childrenOrUndefined || []);
+	} else if(configOrChild) {
+		config = configOrChild;
+		children = childrenOrUndefined || [];
+	}
+
+	var promise = new rsc.Promise(function(parentContainer) {
+		config = Ext.applyIf({
+			xtype: 'container'
+		}, config);
+
+		container = parentContainer.add(config);
+	});
+
+	return promise;
+};
+
+
+rsc.text = function(sizeOrText, textOrUndefined) {
+	var container;
+	var text = Ext.isString(sizeOrText) ? sizeOrText : (textOrUndefined || '');
+	var size = Ext.isNumber(sizeOrText) ? sizeOrText : 12;
+
+	var promise = new rsc.Promise(function(parentContainer) {
+		container = parentContainer.add({
+			xtype: 'container',
+			html: text,
+			style: {
+				fontSize: size + 'px'
+			}
+		});
+	});
+
+	return promise;
+};
+
+
 
 rsc.Compiler = function(env) {
 	this.env = env || {};
@@ -50,48 +110,29 @@ rsc.Promise = function(resolve) {
 
 
 
+(function() {
+	function findSrc() {
+		var scripts = document.getElementsByTagName('script');
 
-rsc.stack = function(configOrChild, childrenOrUndefined) {
-	var container;
-	var children = [];
-	var config = {};
+		var src;
 
-	if(configOrChild && configOrChild.isRscPromise) {
-		children.push(configOrChild);
-		children = Ext.Array.merge(children, childrenOrUndefined || []);
-	} else if(configOrChild) {
-		config = configOrChild;
-		children = childrenOrUndefined || [];
-	}
-
-	var promise = new rsc.Promise(function(parentContainer) {
-		config = Ext.applyIf({
-			xtype: 'container'
-		}, config);
-
-		container = parentContainer.add(config);
-	});
-
-	return promise;
-};
-
-
-rsc.text = function(sizeOrText, textOrUndefined) {
-	var container;
-	var text = Ext.isString(sizeOrText) ? sizeOrText : (textOrUndefined || '');
-	var size = Ext.isNumber(sizeOrText) ? sizeOrText : 12;
-
-	var promise = new rsc.Promise(function(parentContainer) {
-		container = this.add({
-			xtype: 'container',
-			html: text,
-			style: {
-				fontSize: size + 'px'
+		Ext.Array.each(scripts, function(script) {
+			if(script.type === 'text/rscript') {
+				src = script.innerText;
+				return false;
 			}
 		});
+
+		return src;
+	}
+
+
+	Rally.onReady(function() {
+		var src = findSrc();
+
+		if(src) {
+			new rsc.Compiler(rsc).execute(src);
+		}
 	});
-
-	return promise;
-};
-
+})();
 
