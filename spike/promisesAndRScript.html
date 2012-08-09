@@ -84,10 +84,8 @@
 		var src = getSrc();
 		
 		if(src) {
-			var userFuncEval = 'R.userFunc = function(panel, launch) {' + src + '}';
-			eval(userFuncEval);
-
-			R.userFunc(R.panel, R.build);
+			var userFunc = new Function('panel', 'launch', src);
+			userFunc(R.panel, R.build);
 		}
 	</script>
 
