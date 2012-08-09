@@ -58,6 +58,14 @@ rsc.stack = function(configOrChild, varargs) {
 		});
 	});
 
+	promise.add = function(promise) {
+		if(!container) {
+			children.push(promise);
+		} else {
+			promise.resolve(container);
+		}
+	};
+
 	return promise;
 };
 

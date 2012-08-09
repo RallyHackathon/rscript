@@ -10,7 +10,10 @@
 		var t3 = text('and yet some more');
 		var t4 = text('im over here');
 
-		launch(flow(stack(t, t2, t3), t4));
+		var f = flow(stack(t, t2, t3), t4);
+
+		f.add(text('i was added later'));
+		launch(f);
 	</script>
 
 </head>
