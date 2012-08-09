@@ -117,7 +117,7 @@ rsc.Promise = function(resolve) {
 		var src;
 
 		Ext.Array.each(scripts, function(script) {
-			if(script.type === 'text/rscript') {
+			if(script.type === 'rscript') {
 				src = script.innerText;
 				return false;
 			}
