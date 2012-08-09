@@ -1,0 +1,63 @@
+require 'rubygems'
+require 'closure-compiler'
+
+task :default => :minify
+
+def get_files(root, pattern)
+	files = []
+	
+	d = Dir.open(root)
+
+	d.each do |entry|
+		if entry !~ /^\..*/ && entry != 'bootstrap.js'
+			entry = root + '/' + entry
+
+			if File.directory?(entry)
+				files += get_files(entry, pattern)
+			elsif File.file?(entry) && entry =~ pattern
+				files << entry
+			else
+				puts "entry skipped #{entry}"
+			end
+		end
+	end
+
+	files
+end
+
+desc "minify javascript"
+task :minify do
+
+	lib_root = File.expand_path("../lib/")
+  script_names = get_files(lib_root, /.*\.js$/)
+	script_names.insert(0, lib_root + '/bootstrap.js')
+
+	compiler = Closure::Compiler.new
+
+  concatted = ""
+  script_names.each do |script_name|
+		if script_name !~ /.*underscore.*/
+			puts "checking: #{script_name}"
+			raw = IO.read(script_name)
+    	compiler.compile(raw)
+			concatted += raw
+		end
+  end
+
+	minified = compiler.compile(concatted)
+
+	files = [
+		{ :in => concatted, :out => "../lib_min/rscript.debug.js" },
+		{ :in => minified, :out => "../lib_min/rscript.min.js" }
+	]
+
+	puts ""
+	puts ""
+
+	files.each do |file_info|
+		dest = File.expand_path(file_info[:out])
+  	File.open(dest, "w") { |file| file.write(file_info[:in]) }
+		puts "Created #{dest}"
+	end
+end
+
