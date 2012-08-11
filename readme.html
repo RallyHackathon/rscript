@@ -1,0 +1,62 @@
+<h1>rallyscript</h1>
+
+<p>rallyscript is a DSL written in JavaScript with the overall goal of making Rally App SDK 2.0 apps easier to write for casual users. The target audience is people who don't necessarily know Ext (but ideally are comfortable with JavaScript) and want to whip something together quickly and for the most part use SDK components "out of the box".</p>
+
+<p>Stretch goals include ways to truly write powerful/custom apps using just the rallyscript DSL.</p>
+
+<h2>Pros</h2>
+
+<ol>
+<li>The API is very simple, intuitive and doesn't have very many assumptions or expectations</li>
+<li>Users need to know nothing about lifecycles of components.</li>
+<li>Apps written in rallyscript, so far, are much shorter and easier to injest than their regular JS counterparts</li>
+</ol>
+
+<h2>Cons</h2>
+
+<ol>
+<li>There's no way this DSL on its own could ever match the power and flexibility of pure Ext and the Rally SDK</li>
+<li>Debugging sucks (you drop into the DSL's implementation all the time)</li>
+<li>Difficult to know before hand if the DSL will meet your needs or not</li>
+</ol>
+
+<h2>How to write a rallyscript app</h2>
+
+<p>Create an HTML page that pulls in the Rally App SDK (just like a normal app). rallyscript is being written against the App SDK v 2.0p3. Then pull in the <code>rscript.debug.js</code> or <code>rscript.min.js</code> script and ddd a script tag to your page with type set to <code>rscript</code>. Write your app in this script tag.</p>
+
+<pre><code>  &lt;script type="rscript"&gt;
+      var t = text('here is an iteration combobox');
+      var ic = iterationCombobox();
+      launch(t, ic);
+  &lt;/script&gt;
+</code></pre>
+
+<p>See the <code>sandbox/</code> directory for some examples. <code>storyBoard.html</code> is <a href="https://rally1.rallydev.com/apps/2.0p3/doc/#!/guide/appsdk_20_first_app">this app</a> rewritten in rscript</p>
+
+<h2>So ... what is rallyscript?</h2>
+
+<p>It's just JavaScript that is ran in an environment with lots of goodies available for building apps. In the above example, <code>text()</code> and <code>iterationCombobox()</code> look like global functions and you might think they are defined at <code>window.text</code> and <code>window.iterationCombobox</code>. What is actually happening is the above rscript block gets turned into this:</p>
+
+<pre><code>  function(text, iterationCombobox, cardboard, launch /* and everything else rallyscript provides */) {
+       var t = text('here is an iteration combobox');
+       // ....
+  }
+</code></pre>
+
+<p>So within rallyscript, anything that is legal JavaScript is also legal in rallyscript.</p>
+
+<h2>Debugging</h2>
+
+<p>The only way you can debug rallyscript apps is to add <code>debugger</code> statements to your code. Browsers won't honor breakpoints in rallyscript script tags. Truth be told debugging is a huge negative to this idea. Ideally rallyscript apps will be clear enough and simple enough that debugging them will be a rarity. Crossing fingers.</p>
+
+<h2>Known issues</h2>
+
+<p>You can blow away the provided environment very easily by doing this</p>
+
+<pre><code>  &lt;script type='rscript'&gt;
+       var text = text('doh, the local text reference just got redefined');
+       var text2 = text('and this wont work');  
+  &lt;/script&gt;
+</code></pre>
+
+<p>Not yet sure what to do about that, it sucks.</p>

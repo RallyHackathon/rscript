@@ -16,25 +16,13 @@ Stretch goals include ways to truly write powerful/custom apps using just the ra
 
 ## How to write a rallyscript app
 
-1. Create an HTML page that pulls in the Rally App SDK (just like a normal app). rallyscript is being written against the App SDK v 2.0p3
-2. Pull in the `rscript.debug.js` or `rscript.min.js` scripts
-3. Add a script tag to your page with type set to `rscript`
+Create an HTML page that pulls in the Rally App SDK (just like a normal app). rallyscript is being written against the App SDK v 2.0p3. Then pull in the `rscript.debug.js` or `rscript.min.js` script and ddd a script tag to your page with type set to `rscript`. Write your app in this script tag.
 
-      <head>
-          <script type="text/javascript" src="https://rally1.rallydev.com/apps/2.0p3/sdk-debug.js"></script>
-          <script type="text/javascript" src="rscript.debug.js"></script>
-          <script type="rscript">
-               var t = text('here is an iteration combobox');
-                   
-                // if you prefer to use 'new', go ahead, both ways are supported
-                var combobox =  new iterationCombobox(); 
-                // or
-                // var combobox = iterationCombobox();
-                  
-                launch(t, combobox);
-           </script>
-      </head>
-
+      <script type="rscript">
+          var t = text('here is an iteration combobox');
+          var ic = iterationCombobox();
+          launch(t, ic);
+      </script>
 
 See the `sandbox/` directory for some examples. `storyBoard.html` is [this app](https://rally1.rallydev.com/apps/2.0p3/doc/#!/guide/appsdk_20_first_app) rewritten in rscript
 
@@ -42,7 +30,7 @@ See the `sandbox/` directory for some examples. `storyBoard.html` is [this app](
 
 It's just JavaScript that is ran in an environment with lots of goodies available for building apps. In the above example, `text()` and `iterationCombobox()` look like global functions and you might think they are defined at `window.text` and `window.iterationCombobox`. What is actually happening is the above rscript block gets turned into this:
 
-      function(text, iterationCombobox, cardboard /* and everything else rallyscript provides */) {
+      function(text, iterationCombobox, cardboard, launch /* and everything else rallyscript provides */) {
            var t = text('here is an iteration combobox');
            // ....
       }
