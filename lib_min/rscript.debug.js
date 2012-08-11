@@ -44,7 +44,7 @@ rsc.api.addNew = function(types, ignoredFields) {
 		ignoredFields = [ignoredFields];
 	}
 
-	var promise = new rsc.Promise(function(container) {
+	var proxy = new rsc.Proxy(function(container) {
 		this.cmp = container.add({
 			xtype: 'rallyaddnew',
 			recordTypes: types,
@@ -53,7 +53,7 @@ rsc.api.addNew = function(types, ignoredFields) {
 		});
 	});
 
-	promise.defineEventProperties('recordadd', {
+	proxy.defineEventProperties('recordadd', {
 		beforerecordadd: function(callback) {
 			return function(a, e) {
 				callback(new rsc.Record(e.record));
@@ -61,7 +61,7 @@ rsc.api.addNew = function(types, ignoredFields) {
 		}
 	});
 
-	return promise;
+	return proxy;
 };
 
 
@@ -71,7 +71,7 @@ rsc.api.cardboard = function(types, attribute) {
 		types = [types]
 	}
 
-	var promise = new rsc.Promise(function(container) {
+	var proxy = new rsc.Proxy(function(container) {
 		var config = {
 			xtype: 'rallycardboard',
 			types: types,
@@ -88,9 +88,9 @@ rsc.api.cardboard = function(types, attribute) {
 		this.cmp = container.add(config);
 	});
 
-	promise.surfaceMethods('refresh');
+	proxy.surfaceMethods('refresh');
 
-	Object.defineProperty(promise, 'filter', {
+	Object.defineProperty(proxy, 'filter', {
 		set: function(f) {
 			if(this.cmp) {
 				this.cmp.refresh({
@@ -104,38 +104,38 @@ rsc.api.cardboard = function(types, attribute) {
 		}
 	});
 
-	return promise;
+	return proxy;
 };
 
 
 rsc.api.iterationCombobox = function() {
-	var promise = new rsc.Promise(function(container) {
+	var proxy = new rsc.Proxy(function(container) {
 		this.cmp = container.add({
 			xtype: 'rallyiterationcombobox'
 		});
 	});
 
-	promise.defineEventProperties('ready', 'change');
+	proxy.defineEventProperties('ready', 'change');
 
-	promise.surfaceMethodsAsProperties({
+	proxy.surfaceMethodsAsProperties({
 		getDisplayValue: 'value',
 		getValue: 'ref',
 		getQueryFromSelected: 'filter'
 	});
 
-	return promise;
+	return proxy;
 };
 
 rsc.api.stack = function(configOrChild, varargs) {
 	var children = Ext.Array.toArray(arguments);
 	var config = {};
 
-	if(configOrChild && !configOrChild.isRscPromise) {
+	if(configOrChild && !configOrChild.isRscProxy) {
 		config = configOrChild;
 		children = Ext.Array.remove(children, config);
 	}
 
-	var promise = new rsc.Promise(function(parentContainer) {
+	var proxy = new rsc.Proxy(function(parentContainer) {
 		config = Ext.applyIf({
 			xtype: 'container'
 		}, config);
@@ -147,15 +147,15 @@ rsc.api.stack = function(configOrChild, varargs) {
 		}, this);
 	});
 
-	promise.add = function(promise) {
+	proxy.add = function(proxy) {
 		if(!this.cmp) {
-			children.push(promise);
+			children.push(proxy);
 		} else {
-			promise.resolve(this.cmp);
+			proxy.resolve(this.cmp);
 		}
 	};
 
-	return promise;
+	return proxy;
 };
 
 
@@ -163,7 +163,7 @@ rsc.api.text = function(sizeOrText, textOrUndefined) {
 	var text = Ext.isString(sizeOrText) ? sizeOrText : (textOrUndefined || '');
 	var size = Ext.isNumber(sizeOrText) ? sizeOrText : 12;
 
-	var promise = new rsc.Promise(function(parentContainer) {
+	var proxy = new rsc.Proxy(function(parentContainer) {
 		this.cmp = parentContainer.add({
 			xtype: 'container',
 			html: text,
@@ -173,7 +173,7 @@ rsc.api.text = function(sizeOrText, textOrUndefined) {
 		});
 	});
 
-	return promise;
+	return proxy;
 };
 
 
@@ -215,14 +215,14 @@ rsc.Compiler.prototype = {
 	}
 };
 
-rsc.Promise = function(resolve) {
+rsc.Proxy = function(resolve) {
 	this._resolve = resolve ||
 	function() {};
 
 	this.pending = {};
 
 	// cannot place on prototype, must be at the 'leaf'
-	Object.defineProperty(this, 'isRscPromise', {
+	Object.defineProperty(this, 'isRscProxy', {
 		value: true,
 		enumerable: true,
 		writable: false,
@@ -230,7 +230,7 @@ rsc.Promise = function(resolve) {
 	});
 };
 
-rsc.Promise.prototype = {
+rsc.Proxy.prototype = {
 	_resolvePending: function() {
 		if (this.cmp) {
 			Ext.Object.each(this.pending, function(key, value) {
@@ -259,8 +259,8 @@ rsc.Promise.prototype = {
 			config = stringArrayOrConfig;
 		}
 
-		Ext.Object.each(config, function(cmpMethodName, promiseMethodName) {
-			this[promiseMethodName] = function() {
+		Ext.Object.each(config, function(cmpMethodName, ProxyMethodName) {
+			this[ProxyMethodName] = function() {
 				if (this.cmp && Ext.isFunction(this.cmp[cmpMethodName])) {
 					return this.cmp[cmpMethodName].apply(this.cmp, arguments);
 				}
@@ -282,8 +282,8 @@ rsc.Promise.prototype = {
 			config = stringArrayOrConfig;
 		}
 
-		Ext.Object.each(config, function(cmpMethodName, promisePropertyName) {
-			Object.defineProperty(this, promisePropertyName, {
+		Ext.Object.each(config, function(cmpMethodName, ProxyPropertyName) {
+			Object.defineProperty(this, ProxyPropertyName, {
 				get: function() {
 					if (this.cmp && Ext.isFunction(this.cmp[cmpMethodName])) {
 						return this.cmp[cmpMethodName].apply(this.cmp, arguments);
