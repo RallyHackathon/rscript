@@ -145,6 +145,16 @@ describe('Promise', function() {
 			expect(promise.diffNameForFoo()).toBe('foo');
 			expect(promise.diffNameForBar()).toBe('bar');
 			expect(promise.diffNameForDoesntExist()).toBeUndefined();
-		})
+		});
+
+		it('should surfaceMethodsAsProperties', function() {
+			promise.surfaceMethodsAsProperties({
+				foo: 'propNameFoo'
+			});
+
+			promise.resolve();
+
+			expect(promise.propNameFoo).toBe('foo');
+		});
 	});
 });

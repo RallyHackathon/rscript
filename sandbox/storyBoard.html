@@ -13,19 +13,19 @@
 		var combobox = iterationCombobox();
 
 		combobox.ready = function() {
-			cardboard.filter = combobox.filter();
+			cardboard.filter = combobox.filter;
 			stack.add(addNew);
 			stack.add(cardboard);
 		};
 
 		combobox.change = function() {
-			cardboard.filter = combobox.filter();
+			cardboard.filter = combobox.filter;
 		};
 
 		stack.add(combobox);
 
 		addNew.beforerecordadd = function(record) {
-			record.Iteration = combobox.ref();
+			record.Iteration = combobox.ref;
 		};
 
 		addNew.recordadd = function() {
