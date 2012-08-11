@@ -25,7 +25,7 @@
 		stack.add(combobox);
 
 		addNew.beforerecordadd = function(record) {
-			record.set('Iteration', combobox.ref());
+			record.Iteration = combobox.ref();
 		};
 
 		addNew.recordadd = function() {
