@@ -20,26 +20,22 @@ rsc.api.launch = function(varargs) {
 };
 
 
-
 rsc.api.flow = function(configOrChild, varargs) {
 	var children = Ext.Array.toArray(arguments);
 	var config;
 
-	if(configOrChild && !configOrChild.isRscPromise) {
+	if (configOrChild && !configOrChild.isRscPromise) {
 		config = configOrChild;
 		children = Ext.Array.remove(children, config);
 	} else {
 		config = {};
-	} 
+	}
 	config.layout = 'column';
-	
+
 	var args = [config].concat(children);
 	return rsc.api.stack.apply(rsc.stack, args);
 };
-
-
 rsc.api.addNew = function(types, varargs_ignoredFields) {
-	var addNew;
 	var ignored = Ext.Array.toArray(arguments);
 	ignored = Ext.Array.remove(ignored, types);
 
@@ -48,40 +44,15 @@ rsc.api.addNew = function(types, varargs_ignoredFields) {
 	}
 
 	var promise = new rsc.Promise(function(container) {
-		addNew = container.add({
+		this.cmp = container.add({
 			xtype: 'rallyaddnew',
 			recordTypes: types,
 			ignoredRequiredFields: ignored,
 			showAddWithDetails: false
 		});
-
-		Ext.Object.each(promise.pending, function(key, value) {
-			addNew.on(key, value);
-		});
-		promise.pending = {};
 	});
 
-	promise.pending = {};
-
-	Object.defineProperty(promise, 'beforerecordadd', {
-		set: function(callback) {
-			if(addNew) {
-				addNew.on('beforerecordadd', callback);
-			} else {
-				this.pending.beforerecordadd = callback;
-			}
-		}
-	});
-
-	Object.defineProperty(promise, 'recordadd', {
-		set: function(callback) {
-			if(addNew) {
-				addNew.on('recordadd', callback);
-			} else {
-				this.pending.recordadd = callback;
-			}
-		}
-	});
+	promise.defineEventProperties('beforerecordadd', 'recordadd');
 
 	return promise;
 };
@@ -89,8 +60,6 @@ rsc.api.addNew = function(types, varargs_ignoredFields) {
 
 
 rsc.api.cardboard = function(type, attribute) {
-	var cardboard;
-
 	var promise = new rsc.Promise(function(container) {
 		var config = {
 			xtype: 'rallycardboard',
@@ -98,28 +67,26 @@ rsc.api.cardboard = function(type, attribute) {
 			attribute: attribute
 		};
 
-		if(promise.pending.filter) {
+		if(this.pending.filter) {
 			config.storeConfig = {
-				filters: [promise.pending.filter]
+				filters: [this.pending.filter]
 			};
-			delete promise.pending.filter;
+			delete this.pending.filter;
 		}
 
-		cardboard = container.add(config);
+		this.cmp = container.add(config);
 	});
-
-	promise.pending = {};
 
 	Object.defineProperty(promise, 'filter', {
 		set: function(f) {
-			if(cardboard) {
-				cardboard.refresh({
+			if(this.cmp) {
+				this.cmp.refresh({
 					storeConfig: {
 						filters: [f]
 					}
 				});
 			} else {
-				promise.pending.filter = f;
+				this.pending.filter = f;
 			}
 		}
 	});
@@ -129,56 +96,29 @@ rsc.api.cardboard = function(type, attribute) {
 
 
 rsc.api.iterationCombobox = function() {
-	var combobox;
-
 	var promise = new rsc.Promise(function(container) {
-		combobox = container.add({
+		this.cmp = container.add({
 			xtype: 'rallyiterationcombobox'
 		});
-
-		Ext.Object.each(promise.pending, function(key, value) {
-			combobox.on(key, value);
-		});
-		promise.pending = {};
 	});
 
-	promise.pending = {};
+	promise.defineEventProperties('ready', 'change');
 
 	Object.defineProperty(promise, 'value', {
 		get: function() {
-			return combobox && combobox.getDisplayValue();
+			return promise.cmp && promise.cmp.getDisplayValue();
 		}
 	});
 
 	Object.defineProperty(promise, 'ref', {
 		get : function() {
-			return combobox && combobox.getValue();
+			return promise.cmp && promise.cmp.getValue();
 		}
 	});
 
 	Object.defineProperty(promise, 'filter', {
 		get: function() {
-			return combobox && combobox.getQueryFromSelected();
-		}
-	});
-
-	Object.defineProperty(promise, 'ready', {
-		set: function(callback) {
-			if(combobox) {
-				combobox.on('ready', callback);
-			} else {
-				this.pending.ready = callback
-			}
-		}
-	});
-
-	Object.defineProperty(promise, 'change', {
-		set: function(callback) {
-			if(combobox) {
-				combobox.on('change', callback);
-			} else {
-				this.pending.change = callback;
-			}
+			return promise.cmp && promise.cmp.getQueryFromSelected();
 		}
 	});
 
@@ -186,7 +126,6 @@ rsc.api.iterationCombobox = function() {
 };
 
 rsc.api.stack = function(configOrChild, varargs) {
-	var container;
 	var children = Ext.Array.toArray(arguments);
 	var config = {};
 
@@ -200,18 +139,18 @@ rsc.api.stack = function(configOrChild, varargs) {
 			xtype: 'container'
 		}, config);
 
-		container = parentContainer.add(config);
+		this.cmp = parentContainer.add(config);
 
 		Ext.Array.each(children, function(child) {
-			child.resolve(container);
-		});
+			child.resolve(this.cmp);
+		}, this);
 	});
 
 	promise.add = function(promise) {
-		if(!container) {
+		if(!this.cmp) {
 			children.push(promise);
 		} else {
-			promise.resolve(container);
+			promise.resolve(this.cmp);
 		}
 	};
 
@@ -220,12 +159,11 @@ rsc.api.stack = function(configOrChild, varargs) {
 
 
 rsc.api.text = function(sizeOrText, textOrUndefined) {
-	var container;
 	var text = Ext.isString(sizeOrText) ? sizeOrText : (textOrUndefined || '');
 	var size = Ext.isNumber(sizeOrText) ? sizeOrText : 12;
 
 	var promise = new rsc.Promise(function(parentContainer) {
-		container = parentContainer.add({
+		this.cmp = parentContainer.add({
 			xtype: 'container',
 			html: text,
 			style: {
@@ -276,17 +214,51 @@ rsc.Compiler.prototype = {
 	}
 };
 
-
-
 rsc.Promise = function(resolve) {
-	this.resolve = resolve;
-	this.isRscPromise = true;
+	this._resolve = resolve || function() {};
+
+	this.pending = {};
+
+	// cannot place on prototype, must be at the 'leaf'
+	Object.defineProperty(this, 'isRscPromise', {
+		value: true,
+		enumerable: true,
+		writable: false,
+		configurable: false
+	});
 };
 
+rsc.Promise.prototype = {
+	_resolvePending: function() {
+		if (this.cmp) {
+			Ext.Object.each(this.pending, function(key, value) {
+				this.cmp.on(key, value);
+			}, this);
+		}
+		this.pending = {};
+	},
 
+	resolve: function() {
+		this._resolve.apply(this, arguments);
+		this._resolvePending();
+	},
 
+	defineEventProperties: function(varargs) {
+		var properties = Ext.Array.toArray(arguments);
 
-(function() {
+		Ext.Array.each(properties, function(property) {
+			Object.defineProperty(this, property, {
+				set: function(callback) {
+					if (this.cmp) {
+						this.cmp.on(property, callback);
+					} else {
+						this.pending[property] = callback;
+					}
+				}
+			});
+		}, this);
+	}
+};(function() {
 	function patchSdk() {
 
 		// addnew is calling this, not available in RUI
