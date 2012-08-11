@@ -82,6 +82,8 @@ rsc.api.cardboard = function(types, attribute) {
 		this.cmp = container.add(config);
 	});
 
+	promise.surfaceMethods('refresh');
+
 	Object.defineProperty(promise, 'filter', {
 		set: function(f) {
 			if(this.cmp) {
@@ -96,10 +98,6 @@ rsc.api.cardboard = function(types, attribute) {
 		}
 	});
 
-	promise.refresh = function() {
-		this.cmp && this.cmp.refresh();
-	};
-
 	return promise;
 };
 
@@ -113,22 +111,10 @@ rsc.api.iterationCombobox = function() {
 
 	promise.defineEventProperties('ready', 'change');
 
-	Object.defineProperty(promise, 'value', {
-		get: function() {
-			return promise.cmp && promise.cmp.getDisplayValue();
-		}
-	});
-
-	Object.defineProperty(promise, 'ref', {
-		get : function() {
-			return promise.cmp && promise.cmp.getValue();
-		}
-	});
-
-	Object.defineProperty(promise, 'filter', {
-		get: function() {
-			return promise.cmp && promise.cmp.getQueryFromSelected();
-		}
+	promise.surfaceMethods({
+		getDisplayValue: 'value',
+		getValue: 'ref',
+		getQueryFromSelected: 'filter'
 	});
 
 	return promise;
@@ -250,6 +236,29 @@ rsc.Promise.prototype = {
 	resolve: function() {
 		this._resolve.apply(this, arguments);
 		this._resolvePending();
+	},
+
+	surfaceMethods: function(stringArrayOrConfig) {
+		var config;
+		if(Ext.isString(stringArrayOrConfig)) {
+			config = {};
+			config[stringArrayOrConfig] = stringArrayOrConfig;
+		} else if(Ext.isArray(stringArrayOrConfig)) {
+			config = {};
+			Ext.Array.each(stringArrayOrConfig, function(method) {
+				config[method] = method;
+			});
+		} else {
+			config = stringArrayOrConfig;
+		}
+
+		Ext.Object.each(config, function(cmpMethodName, promiseMethodName) {
+			this[promiseMethodName] = function() {
+				if(this.cmp && Ext.isFunction(this.cmp[cmpMethodName])) {
+					return this.cmp[cmpMethodName].apply(this.cmp, arguments);
+				}
+			}
+		}, this);
 	},
 
 	defineEventProperties: function(varargs) {

@@ -12,9 +12,9 @@ describe('Promise', function() {
 		var context;
 		var executed = false;
 		var resolve = function() {
-			executed = true;
-			context = this;
-		};
+				executed = true;
+				context = this;
+			};
 
 		var promise = new rsc.Promise(resolve);
 
@@ -24,47 +24,99 @@ describe('Promise', function() {
 		expect(context).toEqual(promise);
 	});
 
-	it('should setup a pending event handler', function() {
-		debugger;
-		var promise = new rsc.Promise();
+	describe('event handling', function() {
+		it('should setup a pending event handler', function() {
+			debugger;
+			var promise = new rsc.Promise();
 
-		promise.defineEventProperties('myevent', 'myotherevent');
+			promise.defineEventProperties('myevent', 'myotherevent');
 
-		var callback = function() { return 3; };
+			var callback = function() {
+					return 3;
+				};
 
-		promise.myevent = callback;
+			promise.myevent = callback;
 
-		expect(promise.pending.myevent).toEqual(callback);
-		expect(promise.pending.myotherevent).toBeUndefined();
+			expect(promise.pending.myevent).toEqual(callback);
+			expect(promise.pending.myotherevent).toBeUndefined();
 
-		promise.myotherevent = callback;
-		expect(promise.pending.myotherevent).toEqual(callback);
-	});
-
-	it('should resolve pending event handlers', function() {
-		var mockExtTarget = {
-			on: function(eventName, handler) {
-				this[eventName] = handler;
-			}
-		};
-
-		var promise = new rsc.Promise(function() {
-			this.cmp = mockExtTarget;
+			promise.myotherevent = callback;
+			expect(promise.pending.myotherevent).toEqual(callback);
 		});
 
-		promise.defineEventProperties('myevent');
+		it('should resolve pending event handlers', function() {
+			var mockExtTarget = {
+				on: function(eventName, handler) {
+					this[eventName] = handler;
+				}
+			};
 
-		var callback = function() { return 4; };
-		promise.myevent = callback;
+			var promise = new rsc.Promise(function() {
+				this.cmp = mockExtTarget;
+			});
 
-		expect(promise.pending.myevent).toEqual(callback);
+			promise.defineEventProperties('myevent');
 
-		promise.resolve();
+			var callback = function() {
+					return 4;
+				};
+			promise.myevent = callback;
 
-		expect(promise.pending.myevent).toBeUndefined();
+			expect(promise.pending.myevent).toEqual(callback);
 
-		expect(mockExtTarget.myevent).toEqual(callback);
+			promise.resolve();
+
+			expect(promise.pending.myevent).toBeUndefined();
+
+			expect(mockExtTarget.myevent).toEqual(callback);
+		});
+	});
+
+	describe('methods', function() {
+		var cmp;
+		var promise;
+		beforeEach(function() {
+			cmp = {
+				foo: function() { return 'foo'; },
+				bar: function() { return 'bar'; }
+			};
+			promise = new rsc.Promise(function() {
+				this.cmp = cmp;
+			});
+		});
+
+		it('should surfaceMethods with a single string', function() {
+			promise.surfaceMethods('foo');
+			promise.surfaceMethods('bar');
+
+			promise.resolve();
+
+			expect(promise.foo()).toBe('foo');
+			expect(promise.bar()).toBe('bar');
+		});
+
+		it('should surfaceMethods with an array', function() {
+			promise.surfaceMethods(['foo', 'bar', 'doesntexist']);
+
+			promise.resolve();
+
+			expect(promise.foo()).toBe('foo');
+			expect(promise.bar()).toBe('bar');
+			expect(promise.doesntexist()).toBeUndefined();
+		});
+
+		it('should surfaceMethods with a config', function() {
+			promise.surfaceMethods({
+				foo: 'diffNameForFoo',
+				bar: 'diffNameForBar',
+				doesntexist: 'diffNameForDoesntExist'
+			});
+
+			promise.resolve();
+
+			expect(promise.diffNameForFoo()).toBe('foo');
+			expect(promise.diffNameForBar()).toBe('bar');
+			expect(promise.diffNameForDoesntExist()).toBeUndefined();
+		})
 	});
 });
-
-
