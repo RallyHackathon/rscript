@@ -35,19 +35,20 @@ rsc.api.flow = function(configOrChild, varargs) {
 	var args = [config].concat(children);
 	return rsc.api.stack.apply(rsc.stack, args);
 };
-rsc.api.addNew = function(types, varargs_ignoredFields) {
-	var ignored = Ext.Array.toArray(arguments);
-	ignored = Ext.Array.remove(ignored, types);
-
+rsc.api.addNew = function(types, ignoredFields) {
 	if(Ext.isObject(types)) {
 		types = [types];
+	}
+
+	if(Ext.isObject(ignoredFields)) {
+		ignoredFields = [ignoredFields];
 	}
 
 	var promise = new rsc.Promise(function(container) {
 		this.cmp = container.add({
 			xtype: 'rallyaddnew',
 			recordTypes: types,
-			ignoredRequiredFields: ignored,
+			ignoredRequiredFields: ignoredFields,
 			showAddWithDetails: false
 		});
 	});
@@ -59,11 +60,15 @@ rsc.api.addNew = function(types, varargs_ignoredFields) {
 
 
 
-rsc.api.cardboard = function(type, attribute) {
+rsc.api.cardboard = function(types, attribute) {
+	if(Ext.isObject(types)) {
+		types = [types]
+	}
+
 	var promise = new rsc.Promise(function(container) {
 		var config = {
 			xtype: 'rallycardboard',
-			types: [type],
+			types: types,
 			attribute: attribute
 		};
 
@@ -90,6 +95,10 @@ rsc.api.cardboard = function(type, attribute) {
 			}
 		}
 	});
+
+	promise.refresh = function() {
+		this.cmp && this.cmp.refresh();
+	};
 
 	return promise;
 };

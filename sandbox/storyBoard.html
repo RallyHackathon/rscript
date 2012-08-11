@@ -8,7 +8,7 @@
 		var stack = new stack();
 
 		// using 'new' is optional and up to taste
-		var cardboard = cardboard('UserStory', 'ScheduleState');
+		var cardboard = cardboard(['UserStory', 'Defect'], 'ScheduleState');
 		var addNew = new addNew(['UserStory', 'Defect'], ['Name', 'Schedule State']);
 		var combobox = iterationCombobox();
 
@@ -24,11 +24,13 @@
 
 		stack.add(combobox);
 
-		addNew.beforerecordadd = function(record) {
-			record.iteration = comobox.ref;
+		addNew.beforerecordadd = function(addNew, e) {
+			e.record.set('Iteration', combobox.ref);
 		};
 
-		addNew.recordadd = cardboard.refresh;
+		addNew.recordadd = function() {
+			cardboard.refresh();
+		};
 
 		launch(stack);
 	</script>
