@@ -70,6 +70,34 @@ describe('Promise', function() {
 
 			expect(mockExtTarget.myevent).toEqual(callback);
 		});
+
+		it('should allow wrapping callbacks', function() {
+			var mockExtTarget = {
+				on: function(eventName, handler) {
+					this[eventName] = handler;
+				}
+			};
+
+			var promise = new rsc.Promise(function() {
+				this.cmp = mockExtTarget;
+			});
+
+			var givenCallback;
+			var wrapper = function(callback) {
+				givenCallback = callback;
+				return 'wrapped successfully';
+			};
+
+			promise.defineEventProperties({
+				myevent: wrapper
+			});
+
+			var providedCallback = function() {};
+			promise.myevent = providedCallback;
+
+			expect(promise.pending.myevent).toBe('wrapped successfully');
+			expect(givenCallback).toEqual(providedCallback);
+		});
 	});
 
 	describe('methods', function() {

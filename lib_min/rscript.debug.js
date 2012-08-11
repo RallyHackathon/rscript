@@ -53,7 +53,13 @@ rsc.api.addNew = function(types, ignoredFields) {
 		});
 	});
 
-	promise.defineEventProperties('beforerecordadd', 'recordadd');
+	promise.defineEventProperties('recordadd', {
+		beforerecordadd: function(callback) {
+			return function(a, e) {
+				callback(new rsc.Record(e.record));
+			};
+		}
+	});
 
 	return promise;
 };
@@ -210,7 +216,8 @@ rsc.Compiler.prototype = {
 };
 
 rsc.Promise = function(resolve) {
-	this._resolve = resolve || function() {};
+	this._resolve = resolve ||
+	function() {};
 
 	this.pending = {};
 
@@ -240,10 +247,10 @@ rsc.Promise.prototype = {
 
 	surfaceMethods: function(stringArrayOrConfig) {
 		var config;
-		if(Ext.isString(stringArrayOrConfig)) {
+		if (Ext.isString(stringArrayOrConfig)) {
 			config = {};
 			config[stringArrayOrConfig] = stringArrayOrConfig;
-		} else if(Ext.isArray(stringArrayOrConfig)) {
+		} else if (Ext.isArray(stringArrayOrConfig)) {
 			config = {};
 			Ext.Array.each(stringArrayOrConfig, function(method) {
 				config[method] = method;
@@ -254,7 +261,7 @@ rsc.Promise.prototype = {
 
 		Ext.Object.each(config, function(cmpMethodName, promiseMethodName) {
 			this[promiseMethodName] = function() {
-				if(this.cmp && Ext.isFunction(this.cmp[cmpMethodName])) {
+				if (this.cmp && Ext.isFunction(this.cmp[cmpMethodName])) {
 					return this.cmp[cmpMethodName].apply(this.cmp, arguments);
 				}
 			}
@@ -265,18 +272,40 @@ rsc.Promise.prototype = {
 		var properties = Ext.Array.toArray(arguments);
 
 		Ext.Array.each(properties, function(property) {
-			Object.defineProperty(this, property, {
-				set: function(callback) {
-					if (this.cmp) {
-						this.cmp.on(property, callback);
-					} else {
-						this.pending[property] = callback;
+			if (Ext.isString(property)) {
+				Object.defineProperty(this, property, {
+					set: function(callback) {
+						if (this.cmp) {
+							this.cmp.on(property, callback);
+						} else {
+							this.pending[property] = callback;
+						}
 					}
-				}
-			});
+				});
+			} else {
+				Ext.Object.each(property, function(eventName, callbackCreator) {
+					Object.defineProperty(this, eventName, { 
+						set: function(callback) {
+							var wrapped = callbackCreator(callback);
+							if(this.cmp) {
+								this.cmp.on(eventName, wrapped);
+							} else {
+								this.pending[eventName] = wrapped;
+							}
+						}
+					});
+				}, this);	
+			}
 		}, this);
 	}
-};(function() {
+};
+
+rsc.Record = function(extRecord) {
+	return extRecord;
+};
+
+
+(function() {
 	function patchSdk() {
 
 		// addnew is calling this, not available in RUI
