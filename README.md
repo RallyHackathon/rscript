@@ -20,11 +20,12 @@ Stretch goals include ways to truly write powerful/custom apps using just the ra
 2. Pull in the `rscript.debug.js` or `rscript.min.js` scripts
 3. Add a script tag to your page with type set to `rscript`
 
+<pre>
       <!DOCTYPE html>
       <html lang="en">
           <head>
               <script type="text/javascript" src="https://rally1.rallydev.com/apps/2.0p3/sdk-debug.js"></script>
-              <script type="text/javascript" src="rscript.debug.js"></script
+              <script type="text/javascript" src="rscript.debug.js"></script>
               <script type="rscript">
                   var t = text('here is an iteration combobox');
                    
@@ -39,6 +40,7 @@ Stretch goals include ways to truly write powerful/custom apps using just the ra
           <body>
           </body>
       </html>
+</pre>
 
 See the `sandbox/` directory for some examples. `storyBoard.html` is [this app](https://rally1.rallydev.com/apps/2.0p3/doc/#!/guide/appsdk_20_first_app) rewritten in rscript
 
