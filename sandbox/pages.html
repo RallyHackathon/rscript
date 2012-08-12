@@ -6,9 +6,9 @@
 	<script type="text/javascript" src="../lib_min/rscript.debug.js"></script>
 
 	<script type="rscript">
-		var p = page('otherPage', 'hello', 'on', 'another page');
+		var p = page('otherPage', grid('UserStory', ['ObjectID', 'Name', 'ScheduleState']));
 
-		var s = stack('on the', 'first page');
+		var s = stack(cardboard('UserStory', 'ScheduleState'));
 
 		var d = dock(link('home', HomeTag), link('other page', 'otherPage'));
 
