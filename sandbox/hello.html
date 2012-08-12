@@ -5,19 +5,19 @@
 	<script type="text/javascript" src="../lib_min/rscript.debug.js"></script>
 
 	<script type="rscript">
-		var t = text(34, "hello rscript!");
-		var t2 = text('more text here');
-		var t3 = text('and yet some more');
-		var t4 = text('im over here');
+		var h = html(34, "hello rscript!");
+		var h2 = html('more html here');
+		var h3 = html('and yet some more');
+		var h4 = html('im over here');
 		var cb = checkbox('my checkbox', true);
 
 		cb.change = function(value) {
-			t4.text = 'changed to <b>' + value + '</b>';
+			h4.html = 'changed to <b>' + value + '</b>';
 		}
 
-		var f = flow(stack(t, t2, t3), t4);
+		var f = flow(stack(h, h2, h3), h4);
 
-		f.add(text('i was added later'));
+		f.add(html('i was added later'));
 		launch(f, cb);
 	</script>
 

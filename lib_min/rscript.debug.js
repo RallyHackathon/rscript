@@ -55,6 +55,38 @@ rsc.api.flow = function(configOrChild, varargs) {
 	var args = [config].concat(children);
 	return rsc.api.stack.apply(rsc.stack, args);
 };
+rsc.api.html = function(sizeOrHtml, htmlOrUndefined) {
+	var html = Ext.isString(sizeOrHtml) ? sizeOrHtml : (htmlOrUndefined || '');
+	var size = Ext.isNumber(sizeOrHtml) ? sizeOrHtml : 12;
+
+	var proxy = new rsc.Proxy(function(parentContainer) {
+		this.cmp = parentContainer.add({
+			xtype: 'container',
+			html: html,
+			style: {
+				fontSize: size + 'px'
+			}
+		});
+	});
+
+	Object.defineProperty(proxy, 'html', {
+		get: function() {
+			return this.cmp && this.cmp.getEl().dom.innerHTML;
+		},
+		set: function(t) {
+			if(this.cmp) {
+				this.cmp.getEl().dom.innerHTML = t;
+			} else {
+				html = t;
+			}
+		}
+	});
+
+	return proxy;
+};
+
+
+
 rsc.api.addNew = function(types, ignoredFields) {
 	if(Ext.isString(types)) {
 		types = [types];
@@ -177,38 +209,6 @@ rsc.api.stack = function(configOrChild, varargs) {
 
 	return proxy;
 };
-
-
-rsc.api.text = function(sizeOrText, textOrUndefined) {
-	var text = Ext.isString(sizeOrText) ? sizeOrText : (textOrUndefined || '');
-	var size = Ext.isNumber(sizeOrText) ? sizeOrText : 12;
-
-	var proxy = new rsc.Proxy(function(parentContainer) {
-		this.cmp = parentContainer.add({
-			xtype: 'container',
-			html: text,
-			style: {
-				fontSize: size + 'px'
-			}
-		});
-	});
-
-	Object.defineProperty(proxy, 'text', {
-		get: function() {
-			return this.cmp && this.cmp.getEl().dom.innerHTML;
-		},
-		set: function(t) {
-			if(this.cmp) {
-				this.cmp.getEl().dom.innerHTML = t;
-			} else {
-				text = t;
-			}
-		}
-	});
-
-	return proxy;
-};
-
 
 
 rsc.Compiler = function(env) {

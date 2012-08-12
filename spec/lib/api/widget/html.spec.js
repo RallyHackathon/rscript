@@ -1,4 +1,4 @@
-describe('text()', function() {
+describe('html()', function() {
 	var mockContainer;
 
 	beforeEach(function() {
@@ -10,9 +10,9 @@ describe('text()', function() {
 	});
 
 	it('should not blow up with no parameters', function() {
-		var t = rsc.api.text();
+		var h = rsc.api.html();
 
-		t.resolve(mockContainer);
+		h.resolve(mockContainer);
 
 		var config = mockContainer.config;
 
@@ -24,38 +24,38 @@ describe('text()', function() {
 
 	it('should accept just a size parameter', function() {
 		var size = 20;
-		var t = rsc.api.text(size);
+		var h = rsc.api.html(size);
 
-		t.resolve(mockContainer);
+		h.resolve(mockContainer);
 
 		var config = mockContainer.config;
 
 		expect(config.style.fontSize).toBe('' + size + 'px');
 	});
 
-	it('should accept just a text parameter', function() {
-		var text = 'hello';
-		var t = rsc.api.text(text);
+	it('should accept just a html parameter', function() {
+		var html = 'hello';
+		var h = rsc.api.html(html);
 
-		t.resolve(mockContainer);
+		h.resolve(mockContainer);
 
 		var config = mockContainer.config;
 
-		expect(config.html).toEqual(text);
+		expect(config.html).toEqual(html);
 		expect(config.style.fontSize).toBeDefined();
 	});
 
-	it('should accept both a size and text parameter', function() {
+	it('should accept both a size and html parameter', function() {
 		var size = 40;
-		var text = 'big text';
+		var html = 'big html';
 
-		var t = rsc.api.text(size, text);
+		var h = rsc.api.html(size, html);
 
-		t.resolve(mockContainer);
+		h.resolve(mockContainer);
 
 		var config = mockContainer.config;
 
-		expect(config.html).toEqual(text);
+		expect(config.html).toEqual(html);
 		expect(config.style.fontSize).toBe('' + size + 'px');
 	});
 });

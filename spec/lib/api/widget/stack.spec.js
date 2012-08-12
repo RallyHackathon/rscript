@@ -50,11 +50,11 @@ describe('stack()', function() {
 		});
 
 		it('should accept children without options', function() {
-			var child1Text = 'child1';
-			var child2Text = 'child2';
+			var child1Html = 'child1';
+			var child2Html = 'child2';
 
-			var child1 = rsc.api.text(child1Text);
-			var child2 = rsc.api.text(child2Text);
+			var child1 = rsc.api.html(child1Html);
+			var child2 = rsc.api.html(child2Html);
 
 			var s = rsc.api.stack(child1, child2);
 
