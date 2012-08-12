@@ -27,23 +27,27 @@ rsc.api.launch = function(varargs) {
 		renderTo: Ext.getBody(),
 		width: '100%',
 		height: '100%',
-		layout: 'card',
-		itemId: rsc.RootId,
 
-		setToPage: function(tag) {
-			var page = this.down('#' + tag);
-			if(page) {
-				this.layout.setActiveItem(page);
+		items: [{
+			border: false,
+			xtype: 'panel',
+			layout: 'card',
+			itemId: rsc.RootId,
+			setToPage: function(tag) {
+				var page = this.down('#' + tag);
+				if (page) {
+					this.layout.setActiveItem(page);
+				}
+			},
+			goHome: function() {
+				this.setToPage(rsc.api.HomeTag);
 			}
-		},
-		goHome: function() {
-			this.setToPage(rsc.api.HomeTag);
-		}
+		}]
 	});
 
-	window.rsc.__root__ = rootContainer;
+	rsc.__root__ = rootContainer.items.items[0];
 
-	var mainCard = rootContainer.add({
+	var mainCard = rsc.__root__.add({
 		xtype: 'container',
 		width: '100%',
 		height: '100%',
@@ -54,14 +58,11 @@ rsc.api.launch = function(varargs) {
 		item.resolve(mainCard);
 	});
 
-	if(rsc.api.launch.initialTag) {
+	if (rsc.api.launch.initialTag) {
 		rootContainer.setToPage(rsc.api.launch.initialTag);
 		delete rsc.api.launch.initialTag;
 	}
 };
-
-
-
 rsc.api.checkbox = function(label, checked) {
 	var proxy = new rsc.Proxy(function(container) {
 		this.cmp = container.add({
@@ -81,7 +82,7 @@ rsc.api.checkbox = function(label, checked) {
 
 	return proxy;
 };
-/*
+
 rsc.api.dock = function(varargs) {
 	var children = Ext.Array.toArray(arguments);
 
@@ -89,7 +90,9 @@ rsc.api.dock = function(varargs) {
 		var root = container.up('#' + rsc.RootId);
 
 		if (root) {
-			var tempContainer = Ext.widget('container');
+			var tempContainer = Ext.widget('container', {
+				border: false
+			});
 
 			Ext.Array.each(children, function(child) {
 				if (Ext.isString(child)) {
@@ -97,15 +100,13 @@ rsc.api.dock = function(varargs) {
 				}
 				child.resolve(tempContainer);
 			});
-			tempContainer.items.each(function(item) {
-				root.addDocked(item);
-			});
+			root.addDocked(tempContainer);
 		}
 	});
 
 	return proxy;
 };
-*/rsc.api.flow = function(configOrChild, varargs) {
+rsc.api.flow = function(configOrChild, varargs) {
 	var children = Ext.Array.toArray(arguments);
 	var config;
 
