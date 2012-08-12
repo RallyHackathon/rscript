@@ -6,16 +6,39 @@
 })();
 
 rsc.api.launch = function(varargs) {
+	var homeCardId = '__rscriptHomeCard__';
+
 	var items = Ext.Array.toArray(arguments);
 
 	var rootContainer = Ext.widget('container', {
 		renderTo: Ext.getBody(),
 		width: '100%',
-		height: '100%'
+		height: '100%',
+		layout: 'card',
+		itemId: 'rscriptRoot',
+
+		setToPage: function(tag) {
+			var page = this.down('#' + tag);
+			if(page) {
+				this.layout.setActiveItem(page);
+			}
+		},
+		goHome: function() {
+			this.setToPage(homeCardId);
+		}
+	});
+
+	window.rsc.__root__ = rootContainer;
+
+	var mainCard = rootContainer.add({
+		xtype: 'container',
+		width: '100%',
+		height: '100%',
+		itemId: homeCardId
 	});
 
 	Ext.Array.each(items, function(item) {
-		item.resolve(rootContainer);
+		item.resolve(mainCard);
 	});
 };
 
@@ -86,6 +109,52 @@ rsc.api.html = function(sizeOrHtml, htmlOrUndefined) {
 };
 
 
+
+rsc.api.page = function(tag, childrenOrUndefined) {
+	var children = Ext.Array.toArray(arguments);
+	children = Ext.Array.remove(children, tag);
+
+	var proxy = new rsc.Proxy(function(container) {
+		var root = container.up('#rscriptRoot');
+
+		if(root) {
+			this.cmp = root.add({
+				xtype: 'container',
+				width: '100%',
+				height: '100%',
+				itemId: tag
+			});
+
+			Ext.Array.each(children, function(child) {
+				if(Ext.isString(child)) {
+					child = rsc.api.html(child);
+				}
+				child.resolve(this.cmp);
+			}, this);
+		}
+
+	});
+
+	Object.defineProperty(proxy, 'tag', {
+		writable: false,
+		enumerable: true,
+		configurable: false,
+		value: tag
+	});
+
+	proxy.add = function(proxy) {
+		if(Ext.isString(proxy)) {
+			proxy = rsc.api.html(proxy);
+		}
+		if(this.cmp) {
+			proxy.resolve(this.cmp);
+		} else {
+			children.push(proxy);
+		}
+	}
+
+	return proxy;
+};
 
 rsc.api.addNew = function(types, ignoredFields) {
 	if(Ext.isString(types)) {
