@@ -5,17 +5,30 @@
 	this.rsc.global = this;
 })();
 
-rsc.api.launch = function(varargs) {
-	var homeCardId = '__rscriptHomeCard__';
+Object.defineProperty(rsc.api, 'HomeTag', {
+	writable: false,
+	configurable: false,
+	enumerable: true,
+	value: '__rscriptHomeCard__'
+});
 
+Object.defineProperty(rsc, 'RootId', {
+	writable: false,
+	configurable: false,
+	enumerable: true,
+	value: '__rscriptRootId__'
+})
+
+rsc.api.launch = function(varargs) {
 	var items = Ext.Array.toArray(arguments);
 
 	var rootContainer = Ext.widget('container', {
+		border: false,
 		renderTo: Ext.getBody(),
 		width: '100%',
 		height: '100%',
 		layout: 'card',
-		itemId: 'rscriptRoot',
+		itemId: rsc.RootId,
 
 		setToPage: function(tag) {
 			var page = this.down('#' + tag);
@@ -24,7 +37,7 @@ rsc.api.launch = function(varargs) {
 			}
 		},
 		goHome: function() {
-			this.setToPage(homeCardId);
+			this.setToPage(rsc.api.HomeTag);
 		}
 	});
 
@@ -34,12 +47,17 @@ rsc.api.launch = function(varargs) {
 		xtype: 'container',
 		width: '100%',
 		height: '100%',
-		itemId: homeCardId
+		itemId: rsc.api.HomeTag
 	});
 
 	Ext.Array.each(items, function(item) {
 		item.resolve(mainCard);
 	});
+
+	if(rsc.api.launch.initialTag) {
+		rootContainer.setToPage(rsc.api.launch.initialTag);
+		delete rsc.api.launch.initialTag;
+	}
 };
 
 
@@ -63,7 +81,31 @@ rsc.api.checkbox = function(label, checked) {
 
 	return proxy;
 };
-rsc.api.flow = function(configOrChild, varargs) {
+/*
+rsc.api.dock = function(varargs) {
+	var children = Ext.Array.toArray(arguments);
+
+	var proxy = new rsc.Proxy(function(container) {
+		var root = container.up('#' + rsc.RootId);
+
+		if (root) {
+			var tempContainer = Ext.widget('container');
+
+			Ext.Array.each(children, function(child) {
+				if (Ext.isString(child)) {
+					child = rsc.api.html(child);
+				}
+				child.resolve(tempContainer);
+			});
+			tempContainer.items.each(function(item) {
+				root.addDocked(item);
+			});
+		}
+	});
+
+	return proxy;
+};
+*/rsc.api.flow = function(configOrChild, varargs) {
 	var children = Ext.Array.toArray(arguments);
 	var config;
 
@@ -110,12 +152,34 @@ rsc.api.html = function(sizeOrHtml, htmlOrUndefined) {
 
 
 
+rsc.api.link = function(title, urlOrTag) {
+	var proxy = new rsc.Proxy(function(container) {
+		this.cmp = container.add({
+			xtype: 'rallybutton',
+			text: title,
+			handler: this._onClick
+		});
+	});
+
+	proxy._onClick = function(button, e, eOpts) {
+		e.stopEvent();
+
+		if(urlOrTag.indexOf('http:') > -1) {
+			window.location.href = urlOrTag;
+		} else {
+			rsc.api.goToPage(urlOrTag);
+		}
+	}
+
+	return proxy;	
+};
+
 rsc.api.page = function(tag, childrenOrUndefined) {
 	var children = Ext.Array.toArray(arguments);
 	children = Ext.Array.remove(children, tag);
 
 	var proxy = new rsc.Proxy(function(container) {
-		var root = container.up('#rscriptRoot');
+		var root = container.up('#' + rsc.RootId);
 
 		if(root) {
 			this.cmp = root.add({
@@ -155,6 +219,17 @@ rsc.api.page = function(tag, childrenOrUndefined) {
 
 	return proxy;
 };
+
+rsc.api.goToPage = function(tag) {
+	var root = rsc.__root__;
+
+	if(root) {
+		root.setToPage(tag);
+	} else {
+		rsc.api.launch.initialTag = tag;
+	}
+};
+
 
 rsc.api.addNew = function(types, ignoredFields) {
 	if(Ext.isString(types)) {

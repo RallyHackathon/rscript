@@ -6,11 +6,13 @@
 	<script type="text/javascript" src="../lib_min/rscript.debug.js"></script>
 
 	<script type="rscript">
-		var p = page('hello', 'on', 'another page');
+		var p = page('otherPage', 'hello', 'on', 'another page');
 
 		var s = stack('on the', 'first page');
 
-		launch(s, p);
+		//var d = dock(link('home', HomeTag), link('other page', 'otherPage'));
+
+		launch(s, p);//, d);
 	</script>
 
 </head>
