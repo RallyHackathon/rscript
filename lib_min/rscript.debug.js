@@ -20,6 +20,26 @@ rsc.api.launch = function(varargs) {
 };
 
 
+
+rsc.api.checkbox = function(label, checked) {
+	var proxy = new rsc.Proxy(function(container) {
+		this.cmp = container.add({
+			xtype: 'checkbox',
+			boxLabel: label || '',
+			checked: !!checked
+		});
+	});
+
+	proxy.defineEventProperties({
+		change: function(callback) {
+			return function(checkbox, value) {
+				callback(value);
+			}
+		}
+	});
+
+	return proxy;
+};
 rsc.api.flow = function(configOrChild, varargs) {
 	var children = Ext.Array.toArray(arguments);
 	var config;
@@ -171,6 +191,19 @@ rsc.api.text = function(sizeOrText, textOrUndefined) {
 				fontSize: size + 'px'
 			}
 		});
+	});
+
+	Object.defineProperty(proxy, 'text', {
+		get: function() {
+			return this.cmp && this.cmp.getEl().dom.innerHTML;
+		},
+		set: function(t) {
+			if(this.cmp) {
+				this.cmp.getEl().dom.innerHTML = t;
+			} else {
+				text = t;
+			}
+		}
 	});
 
 	return proxy;
