@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<title>rscript grid</title>
+	<script type="text/javascript" src="https://test7cluster.f4tech.com/apps/2.0p3/sdk-debug.js"></script>
+	<script type="text/javascript" src="../lib_min/rscript.debug.js"></script>
+
+	<script type="rscript">
+		var g = grid('UserStory', ['ObjectID', 'Name'], {
+			property: 'Name',
+			operator: 'contains',
+			value: 'email'
+		});
+
+		var flow = flow(html('Welcome '), currentUser());
+		launch(flow, g, html('this should be second'));
+	</script>
+
+</head>
+<body>
+</body>
+</html>
+

@@ -44,7 +44,7 @@ rsc.api.flow = function(configOrChild, varargs) {
 	var children = Ext.Array.toArray(arguments);
 	var config;
 
-	if (configOrChild && !configOrChild.isRscPromise) {
+	if (configOrChild && !configOrChild.isRscProxy) {
 		config = configOrChild;
 		children = Ext.Array.remove(children, config);
 	} else {
@@ -154,6 +154,66 @@ rsc.api.cardboard = function(types, attribute) {
 				this.pending.filter = f;
 			}
 		}
+	});
+
+	return proxy;
+};
+
+
+rsc.api.currentUser = function() {
+	var user = Ext.clone(Rally.environment.getContext().getUser());
+
+	var proxy = rsc.api.html('&nbsp;' + user._refObjectName + '&nbsp;');
+
+	Ext.Object.each(user, function(key, value) {
+		Object.defineProperty(proxy, key, {
+			writable: false,
+			enumerable: true,
+			configurable: false,
+			value: value
+		});
+	});
+
+	return proxy;
+};
+
+
+rsc.api.grid = function(artifactType, columns, filter) {
+	
+	var proxy = new rsc.Proxy(function(container) {
+		var placeHolder = container.add({
+			xtype: 'container'
+		});
+	
+		Rally.data.ModelFactory.getModel({
+			type: artifactType || 'UserStory',
+			success: function(model) {
+				var config = {
+					xtype: 'rallygrid',
+					model: model
+				};
+
+				if(Ext.isArray(filter)) {
+					config.storeConfig = {
+						filters: filter
+					};
+				} else if(Ext.isObject(filter)) {
+					config.storeConfig = {
+						filters: [filter]
+					};
+				}
+
+				if(columns) {
+					config.columnCfgs = columns;
+					config.autoAddAllModelFieldsAsColumns = false;
+				} else {
+					config.autoAddAllModelFieldsAsColumns = true;
+				}
+
+				this.cmp = placeHolder.add(config);
+			},
+			scope: this
+		});
 	});
 
 	return proxy;
