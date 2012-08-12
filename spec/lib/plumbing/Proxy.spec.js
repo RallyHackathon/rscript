@@ -12,9 +12,9 @@ describe('Proxy', function() {
 		var context;
 		var executed = false;
 		var resolve = function() {
-				executed = true;
-				context = this;
-			};
+			executed = true;
+			context = this;
+		};
 
 		var proxy = new rsc.Proxy(resolve);
 

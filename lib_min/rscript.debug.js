@@ -36,11 +36,11 @@ rsc.api.flow = function(configOrChild, varargs) {
 	return rsc.api.stack.apply(rsc.stack, args);
 };
 rsc.api.addNew = function(types, ignoredFields) {
-	if(Ext.isObject(types)) {
+	if(Ext.isString(types)) {
 		types = [types];
 	}
 
-	if(Ext.isObject(ignoredFields)) {
+	if(Ext.isString(ignoredFields)) {
 		ignoredFields = [ignoredFields];
 	}
 
@@ -67,7 +67,7 @@ rsc.api.addNew = function(types, ignoredFields) {
 
 
 rsc.api.cardboard = function(types, attribute) {
-	if(Ext.isObject(types)) {
+	if(Ext.isString(types)) {
 		types = [types]
 	}
 
@@ -75,7 +75,7 @@ rsc.api.cardboard = function(types, attribute) {
 		var config = {
 			xtype: 'rallycardboard',
 			types: types,
-			attribute: attribute
+			attribute: attribute || 'ScheduleState'
 		};
 
 		if(this.pending.filter) {
