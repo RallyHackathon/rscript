@@ -19,9 +19,9 @@ Stretch goals include ways to truly write powerful/custom apps using just the ra
 Create an HTML page that pulls in the Rally App SDK (just like a normal app). rallyscript is being written against the App SDK v 2.0p3. Then pull in the `rscript.debug.js` or `rscript.min.js` script and ddd a script tag to your page with type set to `rscript`. Write your app in this script tag.
 
       <script type="rscript">
-          var t = text('here is an iteration combobox');
+          var h = html('here is an <i>iteration combobox</i>');
           var ic = iterationCombobox();
-          launch(t, ic);
+          launch(h, ic);
       </script>
 
 See the `sandbox/` directory for some examples. `storyBoard.html` is [this app](https://rally1.rallydev.com/apps/2.0p3/doc/#!/guide/appsdk_20_first_app) rewritten in rscript
@@ -30,8 +30,8 @@ See the `sandbox/` directory for some examples. `storyBoard.html` is [this app](
 
 It's just JavaScript that is ran in an environment with lots of goodies available for building apps. In the above example, `text()` and `iterationCombobox()` look like global functions and you might think they are defined at `window.text` and `window.iterationCombobox`. What is actually happening is the above rscript block gets turned into this:
 
-      function(text, iterationCombobox, cardboard, launch /* and everything else rallyscript provides */) {
-           var t = text('here is an iteration combobox');
+      function(html, iterationCombobox, cardboard, launch /* and everything else rallyscript provides */) {
+           var h = html('here is an <i>iteration combobox</i>');
            // ....
       }
 
@@ -46,8 +46,8 @@ The only way you can debug rallyscript apps is to add `debugger` statements to y
 You can blow away the provided environment very easily by doing this
 
       <script type='rscript'>
-           var text = text('doh, the local text reference just got redefined');
-           var text2 = text('and this wont work');	
+           var html = html('doh, the local html reference just got redefined');
+           var html2 = html('and this wont work');	
       </script>
 
-Not yet sure what to do about that, it sucks.
+Not yet sure what to do about that, but have a few ideas.
