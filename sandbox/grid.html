@@ -12,7 +12,7 @@
 			value: 'email'
 		});
 
-		var flow = flow(html('Welcome '), currentUser());
+		var flow = flow('Welcome', currentUser());
 		launch(flow, g, html('this should be second'));
 	</script>
 

@@ -15,9 +15,9 @@
 			h4.html = 'changed to <b>' + value + '</b>';
 		}
 
-		var f = flow(stack(h, h2, h3), h4);
+		var f = flow(stack(h, h2, h3), h4, 'string baby');
 
-		f.add(html('i was added later'));
+		f.add('i was added later as a string');
 		launch(f, cb);
 	</script>
 

@@ -67,10 +67,27 @@ describe('stack()', function() {
 			expect(rootContainer.children.length).toBe(1);
 			expect(rootContainer.children[0].children.length).toBe(2);
 		});
+
+		it('should turn string children into html() proxies', function() {
+
+			spyOn(rsc.api, 'html').andCallThrough();
+
+			var s = rsc.api.stack('thing 1', 'thing 2');
+
+			s.resolve(rootContainer);
+
+			var config = rootContainer.config;
+			expect(Ext.isObject(config)).toBe(true);
+			expect(config.xtype).toBe('container');
+
+			expect(rootContainer.children.length).toBe(1);
+			expect(rootContainer.children[0].children.length).toBe(2);
+
+			expect(rsc.api.html.callCount).toBe(2);
+		});
 	});
 
 	describe('add', function() {
 		// hmmmm, need to think about this
 	});
 });
-

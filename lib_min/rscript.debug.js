@@ -44,7 +44,7 @@ rsc.api.flow = function(configOrChild, varargs) {
 	var children = Ext.Array.toArray(arguments);
 	var config;
 
-	if (configOrChild && !configOrChild.isRscProxy) {
+	if (configOrChild && !configOrChild.isRscProxy && !Ext.isString(configOrChild)) {
 		config = configOrChild;
 		children = Ext.Array.remove(children, config);
 	} else {
@@ -159,25 +159,24 @@ rsc.api.cardboard = function(types, attribute) {
 	return proxy;
 };
 
-
 rsc.api.currentUser = function() {
 	var user = Ext.clone(Rally.environment.getContext().getUser());
 
 	var proxy = rsc.api.html('&nbsp;' + user._refObjectName + '&nbsp;');
 
 	Ext.Object.each(user, function(key, value) {
-		Object.defineProperty(proxy, key, {
-			writable: false,
-			enumerable: true,
-			configurable: false,
-			value: value
-		});
+		if (!Ext.isFunction(value)) {
+			Object.defineProperty(proxy, key, {
+				writable: false,
+				enumerable: true,
+				configurable: false,
+				value: value
+			});
+		}
 	});
 
 	return proxy;
 };
-
-
 rsc.api.grid = function(artifactType, columns, filter) {
 	
 	var proxy = new rsc.Proxy(function(container) {
@@ -242,7 +241,7 @@ rsc.api.stack = function(configOrChild, varargs) {
 	var children = Ext.Array.toArray(arguments);
 	var config = {};
 
-	if(configOrChild && !configOrChild.isRscProxy) {
+	if(configOrChild && !configOrChild.isRscProxy && !Ext.isString(configOrChild)) {
 		config = configOrChild;
 		children = Ext.Array.remove(children, config);
 	}
@@ -255,11 +254,18 @@ rsc.api.stack = function(configOrChild, varargs) {
 		this.cmp = parentContainer.add(config);
 
 		Ext.Array.each(children, function(child) {
+			if(Ext.isString(child)) {
+				child = rsc.api.html(child);
+			}
 			child.resolve(this.cmp);
 		}, this);
 	});
 
 	proxy.add = function(proxy) {
+		if(Ext.isString(proxy)) {
+			proxy = rsc.api.html(proxy);
+		}
+		
 		if(!this.cmp) {
 			children.push(proxy);
 		} else {
