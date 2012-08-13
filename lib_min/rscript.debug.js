@@ -19,8 +19,11 @@ Object.defineProperty(rsc, 'RootId', {
 	value: '__rscriptRootId__'
 })
 
-rsc.api.launch = function(varargs) {
-	var items = Ext.Array.toArray(arguments);
+rsc.api.launch = function(bodyItems, pages, dockedItems) {
+	
+	bodyItems = rsc.util.toArray(bodyItems);
+	pages = rsc.util.toArray(pages);
+	dockedItems = rsc.util.toArray(dockedItems);
 
 	var rootContainer = Ext.widget('container', {
 		border: false,
@@ -45,7 +48,7 @@ rsc.api.launch = function(varargs) {
 		}]
 	});
 
-	rsc.__root__ = rootContainer.items.items[0];
+	rsc.__root__ = rootContainer.down('#' + rsc.RootId);
 
 	var mainCard = rsc.__root__.add({
 		xtype: 'container',
@@ -54,8 +57,19 @@ rsc.api.launch = function(varargs) {
 		itemId: rsc.api.HomeTag
 	});
 
-	Ext.Array.each(items, function(item) {
+	// main body items and pages
+	Ext.Array.each(bodyItems.concat(pages), function(item) {
 		item.resolve(mainCard);
+	});
+
+	// docked items
+	var tempContainer = Ext.widget('container');
+	Ext.Array.each(dockedItems, function(dockedItem) {
+		dockedItem.resolve(tempContainer);
+	});
+
+	tempContainer.items.each(function(item) {
+		rsc.__root__.addDocked(item);
 	});
 
 	if (rsc.api.launch.initialTag) {
@@ -77,30 +91,6 @@ rsc.api.checkbox = function(label, checked) {
 			return function(checkbox, value) {
 				callback(value);
 			}
-		}
-	});
-
-	return proxy;
-};
-
-rsc.api.dock = function(varargs) {
-	var children = Ext.Array.toArray(arguments);
-
-	var proxy = new rsc.Proxy(function(container) {
-		var root = container.up('#' + rsc.RootId);
-
-		if (root) {
-			var tempContainer = Ext.widget('container', {
-				border: false
-			});
-
-			Ext.Array.each(children, function(child) {
-				if (Ext.isString(child)) {
-					child = rsc.api.html(child);
-				}
-				child.resolve(tempContainer);
-			});
-			root.addDocked(tempContainer);
 		}
 	});
 
@@ -629,3 +619,13 @@ rsc.Record.prototype = {
 	});
 })();
 
+
+rsc.util = {
+	toArray: function(arg) {
+		if(!arg) {
+			return [];
+		}
+		
+		return Ext.isArray(arg) ? arg : [arg];
+	}
+};

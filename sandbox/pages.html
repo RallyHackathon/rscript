@@ -10,9 +10,9 @@
 
 		var s = stack(cardboard('UserStory', 'ScheduleState'));
 
-		var d = dock(link('home', HomeTag), link('other page', 'otherPage'));
+		var dockedItems = flow(link('home', HomeTag), link('other page', 'otherPage'));
 
-		launch(s, p, d);
+		launch(s, p, dockedItems);
 	</script>
 
 </head>

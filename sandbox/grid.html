@@ -13,7 +13,7 @@
 		});
 
 		var flow = flow('Welcome', currentUser());
-		launch(flow, g, html('this should be second'));
+		launch([flow, g, 'this should be last']);
 	</script>
 
 </head>
