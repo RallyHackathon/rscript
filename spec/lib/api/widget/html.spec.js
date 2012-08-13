@@ -1,4 +1,4 @@
-describe('html()', function() {
+describe('Html', function() {
 	var mockContainer;
 
 	beforeEach(function() {
@@ -10,7 +10,7 @@ describe('html()', function() {
 	});
 
 	it('should not blow up with no parameters', function() {
-		var h = rsc.api.html();
+		var h = new rsc.api.Html();
 
 		h.resolve(mockContainer);
 
@@ -24,7 +24,7 @@ describe('html()', function() {
 
 	it('should accept just a size parameter', function() {
 		var size = 20;
-		var h = rsc.api.html(size);
+		var h = new rsc.api.Html(size);
 
 		h.resolve(mockContainer);
 
@@ -35,7 +35,7 @@ describe('html()', function() {
 
 	it('should accept just a html parameter', function() {
 		var html = 'hello';
-		var h = rsc.api.html(html);
+		var h = new rsc.api.Html(html);
 
 		h.resolve(mockContainer);
 
@@ -49,7 +49,7 @@ describe('html()', function() {
 		var size = 40;
 		var html = 'big html';
 
-		var h = rsc.api.html(size, html);
+		var h = new rsc.api.Html(size, html);
 
 		h.resolve(mockContainer);
 

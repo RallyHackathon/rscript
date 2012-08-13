@@ -6,11 +6,11 @@
 	<script type="text/javascript" src="../lib_min/rscript.debug.js"></script>
 
 	<script type="rscript">
-		var p = page('otherPage', grid('UserStory', ['ObjectID', 'Name', 'ScheduleState']));
+		var p = new Page('otherPage', new Grid('UserStory', ['ObjectID', 'Name', 'ScheduleState']));
 
-		var s = stack(cardboard('UserStory', 'ScheduleState'));
+		var s = new Stack(new Cardboard('UserStory', 'ScheduleState'));
 
-		var dockedItems = flow(link('home', HomeTag), link('other page', 'otherPage'));
+		var dockedItems = new Flow(new Link('home', HomeTag), new Link('other page', 'otherPage'));
 
 		launch(s, p, dockedItems);
 	</script>

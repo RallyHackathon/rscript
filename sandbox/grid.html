@@ -6,13 +6,13 @@
 	<script type="text/javascript" src="../lib_min/rscript.debug.js"></script>
 
 	<script type="rscript">
-		var g = grid('UserStory', ['ObjectID', 'Name'], {
+		var g = new Grid('UserStory', ['ObjectID', 'Name'], {
 			property: 'Name',
 			operator: 'contains',
 			value: 'email'
 		});
 
-		var flow = flow('Welcome', currentUser());
+		var flow = new Flow('Welcome', new CurrentUser());
 		launch([flow, g, 'this should be last']);
 	</script>
 

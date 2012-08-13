@@ -33,22 +33,22 @@ describe('launch', function() {
 		});
 
 		it('should populate with body items', function() {
-			rsc.api.launch(rsc.api.html('hi'));
+			rsc.api.launch(new rsc.api.Html('hi'));
 
 			expect(getHomePageItems().length).toBe(1);
 		});
 
 		it('should convert strings to html()', function() {
-			spyOn(rsc.api, 'html').andCallThrough();
+			spyOn(rsc.api, 'Html').andCallThrough();
 
 			var s = 'im a string';
 			rsc.api.launch(s);
 
-			expect(rsc.api.html).toHaveBeenCalled();
+			expect(rsc.api.Html).toHaveBeenCalled();
 		});
 
 		it('should accept an array of items', function() {
-			rsc.api.launch(['hi', rsc.api.stack(), rsc.api.flow()]);
+			rsc.api.launch(['hi', new rsc.api.Stack(), new rsc.api.Flow()]);
 
 			expect(getHomePageItems().length).toBe(3);
 		});
@@ -56,7 +56,7 @@ describe('launch', function() {
 	describe('pages', function() {
 		it('should have the other page', function() {
 			var tag = 'otherPage';
-			var p = rsc.api.page(tag, rsc.api.stack());
+			var p = new rsc.api.Page(tag, new rsc.api.Stack());
 
 			rsc.api.launch(null, p);
 
@@ -65,8 +65,8 @@ describe('launch', function() {
 		});
 
 		it('should accept an array of pages', function() {
-			var p1 = rsc.api.page('p1');
-			var p2 = rsc.api.page('p2');
+			var p1 = new rsc.api.Page('p1');
+			var p2 = new rsc.api.Page('p2');
 
 			rsc.api.launch(null, [p1, p2]);
 
@@ -76,7 +76,7 @@ describe('launch', function() {
 	});
 	describe('docked items', function() {
 		it('should have the docked item', function() {
-			var s = rsc.api.stack();
+			var s = new rsc.api.Stack();
 
 			rsc.api.launch(null, null, s);
 

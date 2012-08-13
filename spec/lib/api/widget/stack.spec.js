@@ -1,4 +1,4 @@
-describe('stack()', function() {
+describe('Stack', function() {
 	function getMockContainer() {
 		return {
 			add: function(givenConfig) {
@@ -19,7 +19,7 @@ describe('stack()', function() {
 
 	describe('invoking', function() {
 		it('should not blow up with no parameters', function() {
-			var s = rsc.api.stack();
+			var s = new rsc.api.Stack();
 
 			s.resolve(rootContainer);
 
@@ -37,7 +37,7 @@ describe('stack()', function() {
 				foo: 'bar'
 			};
 
-			var s = rsc.api.stack(options);
+			var s = new rsc.api.Stack(options);
 
 			s.resolve(rootContainer);
 
@@ -53,10 +53,10 @@ describe('stack()', function() {
 			var child1Html = 'child1';
 			var child2Html = 'child2';
 
-			var child1 = rsc.api.html(child1Html);
-			var child2 = rsc.api.html(child2Html);
+			var child1 = new rsc.api.Html(child1Html);
+			var child2 = new rsc.api.Html(child2Html);
 
-			var s = rsc.api.stack(child1, child2);
+			var s = new rsc.api.Stack(child1, child2);
 
 			s.resolve(rootContainer);
 
@@ -70,9 +70,9 @@ describe('stack()', function() {
 
 		it('should turn string children into html() proxies', function() {
 
-			spyOn(rsc.api, 'html').andCallThrough();
+			spyOn(rsc.api, 'Html').andCallThrough();
 
-			var s = rsc.api.stack('thing 1', 'thing 2');
+			var s = new rsc.api.Stack('thing 1', 'thing 2');
 
 			s.resolve(rootContainer);
 
@@ -83,7 +83,7 @@ describe('stack()', function() {
 			expect(rootContainer.children.length).toBe(1);
 			expect(rootContainer.children[0].children.length).toBe(2);
 
-			expect(rsc.api.html.callCount).toBe(2);
+			expect(rsc.api.Html.callCount).toBe(2);
 		});
 	});
 

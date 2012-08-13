@@ -59,10 +59,7 @@ rsc.api.launch = function(bodyItems, pages, dockedItems) {
 
 	// main body items and pages
 	Ext.Array.each(bodyItems.concat(pages), function(item) {
-		if(Ext.isString(item)) {
-			item = rsc.api.html(item);
-		}
-		
+		item = rsc.util.stringToHtml(item);
 		item.resolve(mainCard);
 	});
 
@@ -81,7 +78,7 @@ rsc.api.launch = function(bodyItems, pages, dockedItems) {
 		delete rsc.api.launch.initialTag;
 	}
 };
-rsc.api.checkbox = function(label, checked) {
+rsc.api.Checkbox = function(label, checked) {
 	var proxy = new rsc.Proxy(function(container) {
 		this.cmp = container.add({
 			xtype: 'checkbox',
@@ -100,7 +97,7 @@ rsc.api.checkbox = function(label, checked) {
 
 	return proxy;
 };
-rsc.api.flow = function(configOrChild, varargs) {
+rsc.api.Flow = function(configOrChild, varargs) {
 	var children = Ext.Array.toArray(arguments);
 	var config;
 
@@ -113,9 +110,8 @@ rsc.api.flow = function(configOrChild, varargs) {
 	config.layout = 'column';
 
 	var args = [config].concat(children);
-	return rsc.api.stack.apply(rsc.stack, args);
-};
-rsc.api.html = function(sizeOrHtml, htmlOrUndefined) {
+	return rsc.api.Stack.apply(rsc.Stack, args);
+};rsc.api.Html = function(sizeOrHtml, htmlOrUndefined) {
 	var html = Ext.isString(sizeOrHtml) ? sizeOrHtml : (htmlOrUndefined || '');
 	var size = Ext.isNumber(sizeOrHtml) ? sizeOrHtml : 12;
 
@@ -146,8 +142,7 @@ rsc.api.html = function(sizeOrHtml, htmlOrUndefined) {
 };
 
 
-
-rsc.api.link = function(title, urlOrTag) {
+rsc.api.Link = function(title, urlOrTag) {
 	var proxy = new rsc.Proxy(function(container) {
 		this.cmp = container.add({
 			xtype: 'rallybutton',
@@ -169,7 +164,11 @@ rsc.api.link = function(title, urlOrTag) {
 	return proxy;	
 };
 
-rsc.api.page = function(tag, childrenOrUndefined) {
+rsc.api.Page = function(tag, childrenOrUndefined) {
+	if(!Ext.isString(tag)) {
+		throw new Error("page() must give the page a tag, ie page('mytag', ....)");
+	}
+
 	var children = Ext.Array.toArray(arguments);
 	children = Ext.Array.remove(children, tag);
 
@@ -185,9 +184,7 @@ rsc.api.page = function(tag, childrenOrUndefined) {
 			});
 
 			Ext.Array.each(children, function(child) {
-				if(Ext.isString(child)) {
-					child = rsc.api.html(child);
-				}
+				child = rsc.util.stringToHtml(child);
 				child.resolve(this.cmp);
 			}, this);
 		}
@@ -226,7 +223,7 @@ rsc.api.goToPage = function(tag) {
 };
 
 
-rsc.api.addNew = function(types, ignoredFields) {
+rsc.api.AddNew = function(types, ignoredFields) {
 	if(Ext.isString(types)) {
 		types = [types];
 	}
@@ -257,7 +254,7 @@ rsc.api.addNew = function(types, ignoredFields) {
 
 
 
-rsc.api.cardboard = function(types, attribute) {
+rsc.api.Cardboard = function(types, attribute) {
 	if(Ext.isString(types)) {
 		types = [types]
 	}
@@ -298,10 +295,10 @@ rsc.api.cardboard = function(types, attribute) {
 	return proxy;
 };
 
-rsc.api.currentUser = function() {
+rsc.api.CurrentUser = function() {
 	var user = Ext.clone(Rally.environment.getContext().getUser());
 
-	var proxy = rsc.api.html('&nbsp;' + user._refObjectName + '&nbsp;');
+	var proxy = rsc.api.Html('&nbsp;' + user._refObjectName + '&nbsp;');
 
 	Ext.Object.each(user, function(key, value) {
 		if (!Ext.isFunction(value)) {
@@ -316,7 +313,7 @@ rsc.api.currentUser = function() {
 
 	return proxy;
 };
-rsc.api.grid = function(artifactType, columns, filter) {
+rsc.api.Grid = function(artifactType, columns, filter) {
 	
 	var proxy = new rsc.Proxy(function(container) {
 		var placeHolder = container.add({
@@ -358,7 +355,7 @@ rsc.api.grid = function(artifactType, columns, filter) {
 };
 
 
-rsc.api.iterationCombobox = function() {
+rsc.api.IterationCombobox = function() {
 	var proxy = new rsc.Proxy(function(container) {
 		this.cmp = container.add({
 			xtype: 'rallyiterationcombobox'
@@ -375,8 +372,7 @@ rsc.api.iterationCombobox = function() {
 
 	return proxy;
 };
-
-rsc.api.stack = function(configOrChild, varargs) {
+rsc.api.Stack = function(configOrChild, varargs) {
 	var children = Ext.Array.toArray(arguments);
 	var config = {};
 
@@ -393,17 +389,13 @@ rsc.api.stack = function(configOrChild, varargs) {
 		this.cmp = parentContainer.add(config);
 
 		Ext.Array.each(children, function(child) {
-			if(Ext.isString(child)) {
-				child = rsc.api.html(child);
-			}
+			child = rsc.util.stringToHtml(child);
 			child.resolve(this.cmp);
 		}, this);
 	});
 
 	proxy.add = function(proxy) {
-		if(Ext.isString(proxy)) {
-			proxy = rsc.api.html(proxy);
-		}
+		proxy = rsc.util.stringToHtml(proxy);
 		
 		if(!this.cmp) {
 			children.push(proxy);
@@ -631,5 +623,9 @@ rsc.util = {
 		}
 		
 		return Ext.isArray(arg) ? arg : [arg];
+	},
+
+	stringToHtml: function(str) {
+		return Ext.isString(str) ? new rsc.api.Html(str) : str;
 	}
 };

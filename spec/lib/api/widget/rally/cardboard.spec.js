@@ -1,4 +1,4 @@
-describe('cardboard()', function() {
+describe('Cardboard', function() {
 	function getMockContainer() {
 		return {
 			add: function(givenConfig) {
@@ -21,7 +21,7 @@ describe('cardboard()', function() {
 		it('should accept types as a string', function() {
 			var type = 'justice';
 
-			var cardboard = rsc.api.cardboard(type);
+			var cardboard = new rsc.api.Cardboard(type);
 
 			cardboard.resolve(rootContainer);
 
@@ -32,7 +32,7 @@ describe('cardboard()', function() {
 		it('should accept types as an array', function() {
 			var types = ['justice', 'new lands'];
 
-			var cardboard = rsc.api.cardboard(types);
+			var cardboard = new rsc.api.Cardboard(types);
 
 			cardboard.resolve(rootContainer);
 
@@ -42,7 +42,7 @@ describe('cardboard()', function() {
 		it('should default to ScheduleState if no attribute provided', function() {
 			var type = 'justice';
 
-			var cardboard = rsc.api.cardboard(type);
+			var cardboard = new rsc.api.Cardboard(type);
 
 			cardboard.resolve(rootContainer);
 
@@ -54,7 +54,7 @@ describe('cardboard()', function() {
 		it('should setup the filter', function() {
 			var filter = 'myfilter';
 
-			var cardboard = rsc.api.cardboard('foo');
+			var cardboard = new rsc.api.Cardboard('foo');
 			cardboard.filter = filter;
 
 			expect(cardboard.pending.filter).toEqual(filter);
@@ -75,7 +75,7 @@ describe('cardboard()', function() {
 			
 			var filter = 'myfilter';
 
-			var cardboard = rsc.api.cardboard('foo');
+			var cardboard = new rsc.api.Cardboard('foo');
 
 			cardboard.cmp = cmp;
 
@@ -87,7 +87,7 @@ describe('cardboard()', function() {
 
 	describe('refreshing', function() {
 		it('should surface the refresh method', function() {
-			var cardboard = rsc.api.cardboard();
+			var cardboard = new rsc.api.Cardboard();
 
 			expect(Ext.isFunction(cardboard.refresh)).toBe(true);
 		});

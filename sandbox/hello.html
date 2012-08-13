@@ -5,17 +5,17 @@
 	<script type="text/javascript" src="../lib_min/rscript.debug.js"></script>
 
 	<script type="rscript">
-		var h = html(34, "hello rscript!");
-		var h2 = html('more html here');
-		var h3 = html('and yet some more');
-		var h4 = html('im over here');
-		var cb = checkbox('my checkbox', true);
+		var h = new Html(34, "hello rscript!");
+		var h2 = new Html('more html here');
+		var h3 = new Html('and yet some more');
+		var h4 = new Html('im over here');
+		var cb = new Checkbox('my checkbox', true);
 
 		cb.change = function(value) {
 			h4.html = 'changed to <b>' + value + '</b>';
 		}
 
-		var f = flow(stack(h, h2, h3), h4, 'string baby');
+		var f = new Flow(new Stack(h, h2, h3), h4, 'string baby');
 
 		f.add('i was added later as a string');
 		launch([f, cb]);

@@ -1,13 +1,13 @@
-describe('page', function() {
+describe('Page', function() {
 	it('should throw an error if not given a tag', function() {
 		var run = function() {
-			rsc.api.page();
+			new rsc.api.Page();
 		};
 
 		expect(run).toThrow();
 
 		run = function() {
-			rsc.api.page(rsc.api.stack());
+			new rsc.api.Page(new rsc.api.Stack());
 		};
 
 		expect(run).toThrow();
@@ -16,7 +16,7 @@ describe('page', function() {
 	it('should set the tag on the proxy', function() {
 		var tag = 'mytag';
 
-		var p = rsc.api.page(tag);
+		var p = new rsc.api.Page(tag);
 
 		expect(p.tag).toEqual(tag);
 	});
@@ -34,7 +34,7 @@ describe('page', function() {
 			}
 		};
 
-		var p = rsc.api.page('mytag');
+		var p = new rsc.api.Page('mytag');
 
 		p.resolve(container);
 

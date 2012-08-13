@@ -5,12 +5,11 @@
 	<script type="text/javascript" src="../lib_min/rscript.debug.js"></script>
 
 	<script type="rscript">
-		var stack = new stack();
+		var stack = new Stack();
 
-		// using 'new' is optional and up to taste
-		var cardboard = cardboard(['UserStory', 'Defect'], 'ScheduleState');
-		var addNew = new addNew(['UserStory', 'Defect'], ['Name', 'Schedule State']);
-		var combobox = iterationCombobox();
+		var cardboard = new Cardboard(['UserStory', 'Defect'], 'ScheduleState');
+		var addNew = new AddNew(['UserStory', 'Defect'], ['Name', 'Schedule State']);
+		var combobox = new IterationCombobox();
 
 		combobox.ready = function() {
 			cardboard.filter = combobox.filter;

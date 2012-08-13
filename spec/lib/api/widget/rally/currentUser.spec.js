@@ -1,4 +1,4 @@
-describe('currentUser', function() {
+describe('CurrentUser', function() {
 	function getMockContainer() {
 		return {
 			add: function(givenConfig) {
@@ -38,7 +38,7 @@ describe('currentUser', function() {
 	});
 
 	it('should default to an html() with the current user\'s name', function() {
-		var cu = rsc.api.currentUser();
+		var cu = new rsc.api.CurrentUser();
 
 		cu.resolve(rootContainer);
 
@@ -52,7 +52,7 @@ describe('currentUser', function() {
 			baz: 'baz'
 		};
 
-		var cu = rsc.api.currentUser();
+		var cu = new rsc.api.CurrentUser();
 
 		expect(cu.foo).toEqual(user.foo);
 		expect(cu.obj.bar).toEqual(user.obj.bar);
@@ -61,7 +61,7 @@ describe('currentUser', function() {
 	it('should not surface any methods on user', function() {
 		user.myMethod = function() {};
 
-		var cu = rsc.api.currentUser();
+		var cu = new rsc.api.CurrentUser();
 
 		expect(cu.myMethod).toBeUndefined();
 	});

@@ -1,4 +1,4 @@
-describe('addNew()', function() {
+describe('AddNew', function() {
 	function getMockContainer() {
 		return {
 			add: function(givenConfig) {
@@ -21,7 +21,7 @@ describe('addNew()', function() {
 		it('should take a type as a string', function() {
 			var type = 'Foo';
 
-			var addNew = rsc.api.addNew(type);
+			var addNew = new rsc.api.AddNew(type);
 
 			addNew.resolve(rootContainer);
 
@@ -33,7 +33,7 @@ describe('addNew()', function() {
 		it('should take types as an array', function() {
 			var types = ['Fio', 'Eri', 'Tarma'];
 
-			var addNew = rsc.api.addNew(types);
+			var addNew = new rsc.api.AddNew(types);
 
 			addNew.resolve(rootContainer);
 			expect(rootContainer.config.recordTypes).toEqual(types);
@@ -42,7 +42,7 @@ describe('addNew()', function() {
 		it('should take ignored fields as a string', function() {
 			var ignored = 'medeski';
 
-			var addNew = rsc.api.addNew(null, ignored);
+			var addNew = new rsc.api.AddNew(null, ignored);
 
 			addNew.resolve(rootContainer);
 			expect(rootContainer.config.ignoredRequiredFields).toEqual([ignored]);
@@ -51,7 +51,7 @@ describe('addNew()', function() {
 		it('should take ignored fields as an array', function() {
 			var ignored = ['blues', 'traveller'];
 
-			var addNew = rsc.api.addNew(null, ignored);
+			var addNew = new rsc.api.AddNew(null, ignored);
 
 			addNew.resolve(rootContainer);
 			expect(rootContainer.config.ignoredRequiredFields).toEqual(ignored);
@@ -61,7 +61,7 @@ describe('addNew()', function() {
 			var type = 'foo';
 			var ignored = ['bar', 'baz'];
 
-			var addNew = rsc.api.addNew(type, ignored);
+			var addNew = new rsc.api.AddNew(type, ignored);
 
 			addNew.resolve(rootContainer);
 			expect(rootContainer.config.recordTypes).toEqual([type]);
@@ -71,7 +71,7 @@ describe('addNew()', function() {
 
 	describe('events', function() {
 		it('should handle recordadd', function() {
-			var addNew = rsc.api.addNew();
+			var addNew = new rsc.api.AddNew();
 
 			var callback = function() {};
 
@@ -82,7 +82,7 @@ describe('addNew()', function() {
 		it('should wrap beforerecordadd', function() {
 			var callback = function() {};
 
-			var addNew = rsc.api.addNew();
+			var addNew = new rsc.api.AddNew();
 
 			addNew.beforerecordadd = callback;
 
