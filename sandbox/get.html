@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<title>rscript get</title>
+	<script type="text/javascript" src="https://test7cluster.f4tech.com/apps/2.0p3/sdk-debug.js"></script>
+	<script type="text/javascript" src="../lib_min/rscript.debug.js"></script>
+
+	<script type="rscript">
+		var s = new Stack({ width: 600, height: 600, autoScroll: true});
+
+		s.loadMask = true;
+		get(['UserStory', 'Defect'], 10, null, function(userStories, defects) {
+			(userStories.concat(defects)).forEach(function(artifact) {
+				var f = new Flow(artifact.Priority ? 'Defect: ' : 'Story: ', artifact.Name);
+				s.add(f);
+			});
+			s.loadMask = false;
+		});
+
+		launch(s);
+
+	</script>
+
+</head>
+<body>
+</body>
+</html>

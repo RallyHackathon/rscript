@@ -5,6 +5,75 @@
 	this.rsc.global = this;
 })();
 
+rsc.api.CustomData = function(records, columnsOrBuilder, orderBy) {
+	
+	function createColumnBuilder(columns) {
+		return function(record) {
+			var translated = {};
+
+			columns.forEach(function(column) {
+				translated[column] = record[column];
+			});
+			return translated;
+		};
+	}
+
+	function aggregate(records, builder) {
+		if(!Ext.isFunction(builder)) {
+			builder = createColumnBuilder(builder);
+		}
+
+		return records.map(builder);
+	}
+
+	records = aggregate(records, columnsOrBuilder);
+
+	var customStore = Ext.create('Rally.data.custom.Store', {
+		data: records
+	});
+
+	Object.defineProperty(customStore, 'records', {
+		writable: false,
+		configurable: false,
+		enumerable: true,
+		value: records
+	});
+
+	return customStore;
+};
+rsc.api.get = function(artifactTypes, pageSize, filter, callback) {
+	pageSize = pageSize || 50;
+
+	artifactTypes = rsc.util.toArray(artifactTypes);
+	var pendingRequests = artifactTypes.length;
+	var retrievedRecords = [];
+
+	function onDataLoaded(store, records, artifactType) {
+		var index = artifactTypes.indexOf(artifactType);
+		retrievedRecords[index] = rsc.Record.wrap(records);
+
+		--pendingRequests;
+
+		if(pendingRequests === 0) {
+			callback.apply(null, retrievedRecords);
+		}
+	}
+
+	artifactTypes.forEach(function(artifactType) {
+		Ext.create('Rally.data.WsapiDataStore', {
+			model: artifactType,
+			fetch: true,
+			autoLoad: true,
+			pageSize: pageSize,
+			listeners: {
+				load: function(store, data) {
+					onDataLoaded(store, data, artifactType);
+				}
+			}
+		});
+	});
+};
+
 Object.defineProperty(rsc.api, 'HomeTag', {
 	writable: false,
 	configurable: false,
@@ -35,6 +104,8 @@ rsc.api.launch = function(bodyItems, pages, dockedItems) {
 			border: false,
 			xtype: 'panel',
 			layout: 'card',
+			width: '100%',
+			height: '100%',
 			itemId: rsc.RootId,
 			setToPage: function(tag) {
 				var page = this.down('#' + tag);
@@ -312,49 +383,95 @@ rsc.api.CurrentUser = function() {
 	});
 
 	return proxy;
-};
-rsc.api.Grid = function(artifactType, columns, filter) {
-	
+};rsc.api.Grid = function(artifactTypeOrStore, columns, filter) {
+
+	function convertStringColumns(strings) {
+		var columns = [];
+
+		strings.forEach(function(str) {
+			columns.push({
+				text: str,
+				dataIndex: str
+			});
+		});
+
+		if(columns[0]) {
+			columns[0].flex = 1;
+		}
+
+		return columns;
+	}
+
 	var proxy = new rsc.Proxy(function(container) {
-		var placeHolder = container.add({
-			xtype: 'container'
-		});
-	
-		Rally.data.ModelFactory.getModel({
-			type: artifactType || 'UserStory',
-			success: function(model) {
-				var config = {
-					xtype: 'rallygrid',
-					model: model
+
+		if (Ext.isString(artifactTypeOrStore)) {
+			var artifactType = artifactTypeOrStore;
+
+			var placeHolder = container.add({
+				xtype: 'container'
+			});
+
+			Rally.data.ModelFactory.getModel({
+				type: artifactType || 'UserStory',
+				success: function(model) {
+					var config = {
+						xtype: 'rallygrid',
+						model: model
+					};
+
+					if (Ext.isArray(filter)) {
+						config.storeConfig = {
+							filters: filter
+						};
+					} else if (Ext.isObject(filter)) {
+						config.storeConfig = {
+							filters: [filter]
+						};
+					}
+
+					if (columns) {
+						config.columnCfgs = columns;
+						config.autoAddAllModelFieldsAsColumns = false;
+					} else {
+						config.autoAddAllModelFieldsAsColumns = true;
+					}
+
+					this.cmp = placeHolder.add(config);
+				},
+				scope: this
+			});
+		} else {
+			var config = {
+				xtype: 'rallygrid',
+				store: artifactTypeOrStore
+			};
+
+			if (Ext.isArray(filter)) {
+				config.storeConfig = {
+					filters: filter
 				};
+			} else if (Ext.isObject(filter)) {
+				config.storeConfig = {
+					filters: [filter]
+				};
+			}
 
-				if(Ext.isArray(filter)) {
-					config.storeConfig = {
-						filters: filter
-					};
-				} else if(Ext.isObject(filter)) {
-					config.storeConfig = {
-						filters: [filter]
-					};
+			if (columns) {
+				if(artifactTypeOrStore.$className.indexOf('WsapiDataStore') === -1) {
+					columns = convertStringColumns(columns);
 				}
+				config.columnCfgs = columns;
+				config.autoAddAllModelFieldsAsColumns = false;
+			} else {
+				config.autoAddAllModelFieldsAsColumns = true;
+			}
 
-				if(columns) {
-					config.columnCfgs = columns;
-					config.autoAddAllModelFieldsAsColumns = false;
-				} else {
-					config.autoAddAllModelFieldsAsColumns = true;
-				}
-
-				this.cmp = placeHolder.add(config);
-			},
-			scope: this
-		});
+			this.cmp = container.add(config);
+		}
 	});
 
 	return proxy;
 };
-
-
 rsc.api.IterationCombobox = function() {
 	var proxy = new rsc.Proxy(function(container) {
 		this.cmp = container.add({
@@ -392,6 +509,9 @@ rsc.api.Stack = function(configOrChild, varargs) {
 			child = rsc.util.stringToHtml(child);
 			child.resolve(this.cmp);
 		}, this);
+
+		this.loadMask = this.pending.loadMask;
+		delete this.pending.loadMask;
 	});
 
 	proxy.add = function(proxy) {
@@ -403,6 +523,20 @@ rsc.api.Stack = function(configOrChild, varargs) {
 			proxy.resolve(this.cmp);
 		}
 	};
+
+	Object.defineProperty(proxy, 'loadMask', {
+		set: function(value) {
+			if(this.cmp) {
+				if(value) {
+					this.cmp.getEl().mask('Loading...');
+				} else {
+					this.cmp.getEl().unmask();
+				}
+			} else {
+				this.pending.loadMask = value;
+			}
+		}
+	});
 
 	return proxy;
 };
@@ -553,9 +687,7 @@ rsc.Proxy.prototype = {
 			}
 		}, this);
 	}
-};
-
-rsc.Record = function(extRecord) {
+};rsc.Record = function(extRecord) {
 	this._extRecord = extRecord;
 	this._wrap();
 };
@@ -577,8 +709,17 @@ rsc.Record.prototype = {
 	}
 };
 
+rsc.Record.wrap = function(records) {
+	var wrapped = [];
 
+	records = rsc.util.toArray(records);
 
+	records.forEach(function(record) {
+		wrapped.push(new rsc.Record(record));
+	});
+
+	return wrapped;
+};
 (function() {
 	function patchSdk() {
 
