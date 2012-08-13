@@ -59,6 +59,10 @@ rsc.api.launch = function(bodyItems, pages, dockedItems) {
 
 	// main body items and pages
 	Ext.Array.each(bodyItems.concat(pages), function(item) {
+		if(Ext.isString(item)) {
+			item = rsc.api.html(item);
+		}
+		
 		item.resolve(mainCard);
 	});
 
