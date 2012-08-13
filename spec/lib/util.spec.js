@@ -8,7 +8,7 @@ describe('util', function() {
 		});
 
 		it('should leave arrays alone', function() {
-			var a = [1,2,3];
+			var a = [1, 2, 3];
 			expect(rsc.util.toArray(a)).toBe(a);
 		});
 
@@ -17,5 +17,43 @@ describe('util', function() {
 			expect(rsc.util.toArray(12)).toEqual([12]);
 			expect(rsc.util.toArray({})).toEqual([{}]);
 		});
-	});	
+	});
+
+	describe('stringToHtml', function() {
+
+		function getMockContainer() {
+			return {
+				add: function(givenConfig) {
+					this.config = givenConfig;
+					this.children = this.children || [];
+					var child = getMockContainer();
+					this.children.push(child);
+					return child;
+				}
+			};
+		}
+
+		var rootContainer;
+
+		beforeEach(function() {
+			rootContainer = getMockContainer();
+		});
+
+		it('should leave it alone if its not a string', function() {
+			var notAString = {};
+
+			expect(rsc.util.stringToHtml(notAString)).toBe(notAString);
+		});
+
+		it('should convert the string to an html proxy', function() {
+			var str = 'hello what up';
+
+			var result = rsc.util.stringToHtml(str);
+
+			expect(result.isRscProxy).toBe(true);
+
+			result.resolve(rootContainer);
+			expect(rootContainer.config.html).toEqual(str);
+		});
+	});
 });
