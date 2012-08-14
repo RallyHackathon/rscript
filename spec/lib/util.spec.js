@@ -70,5 +70,9 @@ describe('util', function() {
 			expect(rsc.util.camelToHuman('whats up')).toEqual('Whats up');
 			expect(rsc.util.camelToHuman('')).toEqual('');
 		});
+
+		it('should leave consecutive capital letters alone', function() {
+			expect(rsc.util.camelToHuman('FormattedID')).toEqual('Formatted ID');
+		});
 	});
 });

@@ -5,9 +5,10 @@
 	this.rsc.global = this;
 })();
 
-rsc.api.CustomData = function(records, columnsOrBuilder, orderBy) {
-	
+(function() {
 	function createColumnBuilder(columns) {
+		columns = rsc.util.toArray(columns);
+
 		return function(record) {
 			var translated = {};
 
@@ -19,29 +20,30 @@ rsc.api.CustomData = function(records, columnsOrBuilder, orderBy) {
 	}
 
 	function aggregate(records, builder) {
-		if(!Ext.isFunction(builder)) {
+		if (!Ext.isFunction(builder)) {
 			builder = createColumnBuilder(builder);
 		}
 
 		return records.map(builder);
 	}
 
-	records = aggregate(records, columnsOrBuilder);
+	rsc.api.CustomData = function(records, columnsOrBuilder, sortOn, direction) {
+		records = aggregate(records, columnsOrBuilder);
 
-	var customStore = Ext.create('Rally.data.custom.Store', {
-		data: records
-	});
+		var config = {
+			data: records,
+			fields: [] // workaround for bug in R.d.custom.Store
+		};
 
-	Object.defineProperty(customStore, 'records', {
-		writable: false,
-		configurable: false,
-		enumerable: true,
-		value: records
-	});
+		if(sortOn) {
+			config.sorters = [{ property: sortOn, direction: (direction || 'ASC')}];
+		}
 
-	return customStore;
-};
-rsc.api.get = function(artifactTypes, pageSize, filter, callback) {
+		var customStore = Ext.create('Rally.data.custom.Store', config);
+
+		return customStore;
+	};
+})();rsc.api.get = function(artifactTypes, pageSize, filter, callback) {
 	pageSize = pageSize || 50;
 
 	artifactTypes = rsc.util.toArray(artifactTypes);
@@ -383,7 +385,7 @@ rsc.api.CurrentUser = function() {
 	});
 
 	return proxy;
-};rsc.api.Grid = function(artifactTypeOrStore, columns, filter) {
+};(function() {
 
 	function convertStringColumns(strings) {
 		var columns = [];
@@ -395,83 +397,61 @@ rsc.api.CurrentUser = function() {
 			});
 		});
 
-		if(columns[0]) {
+		if (columns[0]) {
 			columns[0].flex = 1;
 		}
 
 		return columns;
 	}
 
-	var proxy = new rsc.Proxy(function(container) {
+	function addGridTo(container, columns, filter, configOverrides) {
+		var config = {
+			xtype: 'rallygrid'
+		};
 
-		if (Ext.isString(artifactTypeOrStore)) {
-			var artifactType = artifactTypeOrStore;
-
-			var placeHolder = container.add({
-				xtype: 'container'
-			});
-
-			Rally.data.ModelFactory.getModel({
-				type: artifactType || 'UserStory',
-				success: function(model) {
-					var config = {
-						xtype: 'rallygrid',
-						model: model
-					};
-
-					if (Ext.isArray(filter)) {
-						config.storeConfig = {
-							filters: filter
-						};
-					} else if (Ext.isObject(filter)) {
-						config.storeConfig = {
-							filters: [filter]
-						};
-					}
-
-					if (columns) {
-						config.columnCfgs = columns;
-						config.autoAddAllModelFieldsAsColumns = false;
-					} else {
-						config.autoAddAllModelFieldsAsColumns = true;
-					}
-
-					this.cmp = placeHolder.add(config);
-				},
-				scope: this
-			});
-		} else {
-			var config = {
-				xtype: 'rallygrid',
-				store: artifactTypeOrStore
+		if (Ext.isDefined(filter)) {
+			config.storeConfig = {
+				filters: rsc.util.toArray(filter)
 			};
-
-			if (Ext.isArray(filter)) {
-				config.storeConfig = {
-					filters: filter
-				};
-			} else if (Ext.isObject(filter)) {
-				config.storeConfig = {
-					filters: [filter]
-				};
-			}
-
-			if (columns) {
-				if(artifactTypeOrStore.$className.indexOf('WsapiDataStore') === -1) {
-					columns = convertStringColumns(columns);
-				}
-				config.columnCfgs = columns;
-				config.autoAddAllModelFieldsAsColumns = false;
-			} else {
-				config.autoAddAllModelFieldsAsColumns = true;
-			}
-
-			this.cmp = container.add(config);
 		}
-	});
 
-	return proxy;
-};
+		if (columns) {
+			config.columnCfgs = columns;
+			config.autoAddAllModelFieldsAsColumns = false;
+		} else {
+			config.autoAddAllModelFieldsAsColumns = true;
+		}
+
+		config = Ext.apply(config, configOverrides);
+
+		return container.add(config);
+	}
+
+	rsc.api.Grid = function(artifactTypeOrStore, columns, filter) {
+		var proxy = new rsc.Proxy(function(container) {
+			if (Ext.isString(artifactTypeOrStore)) {
+				var placeHolder = container.add({
+					xtype: 'container'
+				});
+				Rally.data.ModelFactory.getModel({
+					type: artifactTypeOrStore || 'UserStory',
+					success: function(model) {
+						this.cmp = addGridTo(placeHolder, columns, filter, {
+							model: model
+						});
+					},
+					scope: this
+				});
+			} else {
+				this.cmp = addGridTo(container, convertStringColumns(columns), filter, {
+					store: artifactTypeOrStore
+				});
+			}
+		});
+
+		return proxy;
+	};
+})();
 rsc.api.IterationCombobox = function() {
 	var proxy = new rsc.Proxy(function(container) {
 		this.cmp = container.add({
@@ -523,20 +503,6 @@ rsc.api.Stack = function(configOrChild, varargs) {
 			proxy.resolve(this.cmp);
 		}
 	};
-
-	Object.defineProperty(proxy, 'loadMask', {
-		set: function(value) {
-			if(this.cmp) {
-				if(value) {
-					this.cmp.getEl().mask('Loading...');
-				} else {
-					this.cmp.getEl().unmask();
-				}
-			} else {
-				this.pending.loadMask = value;
-			}
-		}
-	});
 
 	return proxy;
 };
@@ -768,5 +734,20 @@ rsc.util = {
 
 	stringToHtml: function(str) {
 		return Ext.isString(str) ? new rsc.api.Html(str) : str;
+	},
+
+	camelToHuman: function(str) {
+		if(!Ext.isString(str)) {
+			return str;
+		}
+
+		// not the best implementation, but it works
+
+		str = str.replace(/([A-Z])/g, ' $1');
+
+		// convert things like "I D" back to "ID"
+		str = str.replace(/([A-Z])\s([A-Z])/g, '$1$2');
+
+		return Ext.String.trim(Ext.String.capitalize(str));
 	}
 };
