@@ -390,7 +390,7 @@ rsc.api.CurrentUser = function() {
 
 		strings.forEach(function(str) {
 			columns.push({
-				text: str,
+				text: rsc.util.camelToHuman(str),
 				dataIndex: str
 			});
 		});

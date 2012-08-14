@@ -56,4 +56,19 @@ describe('util', function() {
 			expect(rootContainer.config.html).toEqual(str);
 		});
 	});
+
+	describe("camelToHuman", function() {
+		it('should pass non strings through', function() {
+			expect(rsc.util.camelToHuman(2)).toEqual(2);
+			expect(rsc.util.camelToHuman({})).toEqual({});
+			expect(rsc.util.camelToHuman(null)).toEqual(null);
+			expect(rsc.util.camelToHuman(undefined)).toEqual(undefined);
+		});
+
+		it('should convert camel to human', function() {
+			expect(rsc.util.camelToHuman('helloThere')).toEqual('Hello There');
+			expect(rsc.util.camelToHuman('whats up')).toEqual('Whats up');
+			expect(rsc.util.camelToHuman('')).toEqual('');
+		});
+	});
 });

@@ -8,14 +8,12 @@
 	<script type="rscript">
 		var s = new Stack();
 
-		s.loadMask = true;
 		get(['UserStory', 'Defect', 'Task'], 200, null, function(userStories, defects, tasks) {
 			// var records = join(userStories, defects, tasks);
 			var records = (userStories.concat(defects)).concat(tasks);
 			var columns = ['Name', 'FormattedID', 'ScheduleState'];
 			var customData = new CustomData(records, columns);
 			s.add(new Grid(customData, columns));
-			s.loadMask = false;
 		});
 
 		launch(s);
