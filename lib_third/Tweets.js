@@ -11,7 +11,7 @@ rsc.api.Tweets = function(username, count) {
 
     	proxy: {
     	    type: 'jsonp',
-    	    url : document.location.protocol + '//api.twitter.com/1/statuses/user_timeline.json',
+    	    url : '//api.twitter.com/1/statuses/user_timeline.json',
     	    extraParams: {
     	    	screen_name: username,
     	    	count: count,
