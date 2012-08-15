@@ -200,11 +200,11 @@ rsc.api.Flow = function(configOrChild, varargs) {
 
 	Object.defineProperty(proxy, 'html', {
 		get: function() {
-			return this.cmp && this.cmp.getEl().dom.innerHTML;
+			return this.cmp && this.cmp.html;
 		},
 		set: function(t) {
 			if(this.cmp) {
-				this.cmp.getEl().dom.innerHTML = t;
+				this.cmp.update(t);
 			} else {
 				html = t;
 			}
