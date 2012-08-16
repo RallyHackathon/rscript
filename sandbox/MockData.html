@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<title>rscript mock data app</title>
+	<script type="text/javascript" src="https://test1cluster.f4tech.com/apps/2.0p3/sdk-debug.js"></script>
+	<script type="text/javascript" src="../lib_min/rscript.debug.js"></script>
+
+	<script type="rscript">
+		function TypePicker() {
+			var types = ['UserStory', 'Defect'];
+
+			var flow = new Flow();
+
+			function onTypeClick(button) {
+				flow.fireEvent('typechosen', button.type);
+			}
+
+			types.forEach(function(type) {
+				var b = new Button(type);
+				b.type = type;
+				b.click = onTypeClick;
+
+				flow.add(b);
+			});
+
+			return flow;
+		}
+
+		function createArtifactUi(stack, typeName) {
+			var addAttribute = new Button('+ Attribute');
+			var flow = new Flow(new Html(30, typeName), addAttribute);
+			var attributeStack = new Stack();
+			var goButton = new Button('Go!');
+
+			stack.add(flow, attributeStack, goButton);
+
+			addAttribute.click = function() {
+				// attributeStack.add(new AttributeSpec());
+				attributeStack.add(new Html('attribute here'));
+			}
+
+			// var type = getRallyType(typeName);
+		}
+
+		var typePicker = new TypePicker();
+		var stack = new Stack(typePicker);
+		typePicker.on('typechosen', function(type) {
+			stack.remove(typePicker);
+			createArtifactUi(stack, type);
+		})
+
+		launch(stack);
+	</script>
+</head>
+<body>
+</body>
+</html>

@@ -343,6 +343,25 @@ rsc.api.AddNew = function(types, ignoredFields) {
 };
 
 
+rsc.api.Button = function(text) {
+	var proxy = new rsc.Proxy(function(container) {
+		this.cmp = container.add({
+			xtype: 'rallybutton',
+			text: text
+		});
+	});
+
+	proxy.defineEventProperties({
+		click: function(callback) {
+			return function(extButton) {
+				callback(proxy);
+			};
+		}
+	});
+
+	return proxy;
+};
+
 
 rsc.api.Cardboard = function(types, attribute) {
 	if(Ext.isString(types)) {
@@ -490,7 +509,7 @@ rsc.api.Stack = function(configOrChild, varargs) {
 	var children = Ext.Array.toArray(arguments);
 	var config = {};
 
-	if(configOrChild && !configOrChild.isRscProxy && !Ext.isString(configOrChild)) {
+	if (configOrChild && !configOrChild.isRscProxy && !Ext.isString(configOrChild)) {
 		config = configOrChild;
 		children = Ext.Array.remove(children, config);
 	}
@@ -511,20 +530,34 @@ rsc.api.Stack = function(configOrChild, varargs) {
 		delete this.pending.loadMask;
 	});
 
-	proxy.add = function(proxy) {
-		proxy = rsc.util.stringToHtml(proxy);
-		
-		if(!this.cmp) {
-			children.push(proxy);
-		} else {
-			proxy.resolve(this.cmp);
-		}
+	proxy.add = function(varargs) {
+		var proxies = Ext.Array.toArray(arguments);
+
+		Ext.Array.each(proxies, function(proxy) {
+			proxy = rsc.util.stringToHtml(proxy);
+
+			if (!this.cmp) {
+				children.push(proxy);
+			} else {
+				proxy.resolve(this.cmp);
+			}
+		}, this);
 	};
+
+	proxy.remove = function(varargs) {
+		var proxies = Ext.Array.toArray(arguments);
+
+		Ext.Array.each(proxies, function(proxy) {
+			if (this.cmp) {
+				this.cmp.remove(proxy.cmp);
+			} else {
+				children = Ext.Array.remove(children, proxy);
+			}
+		}, this);
+	}
 
 	return proxy;
 };
-
-
 rsc.Compiler = function(env) {
 	this.env = env || {};
 };
@@ -669,6 +702,20 @@ rsc.Proxy.prototype = {
 				}, this);
 			}
 		}, this);
+	},
+
+	fireEvent: function(eventName, varargs) {
+		if(this.cmp) {
+			this.cmp.fireEvent.apply(this.cmp, arguments);
+		}
+	},
+
+	on: function(eventName, handler) {
+		if(this.cmp) {
+			this.cmp.on(eventName, handler);
+		} else {
+			this.pending[eventName] = handler;
+		}
 	}
 };rsc.Record = function(extRecord) {
 	this._extRecord = extRecord;
