@@ -26,6 +26,24 @@
 			return flow;
 		}
 
+		function AttributeSpec(type) {
+			var flow = new Flow();
+			var combo = new Combobox('Attribute: ', type.getEditableAttributes());
+			flow.add(combo);
+
+			var value;
+
+			combo.select = function() {
+				if(value) {
+					flow.remove(value);
+				}
+				value = new AttributeCombobox(type.name, combo.value);
+				flow.add(value);
+			}
+
+			return flow;
+		}
+
 		function createArtifactUi(stack, typeName) {
 			var addAttribute = new Button('+ Attribute');
 			var flow = new Flow(new Html(30, typeName), addAttribute);
@@ -35,11 +53,10 @@
 			stack.add(flow, attributeStack, goButton);
 
 			addAttribute.click = function() {
-				// attributeStack.add(new AttributeSpec());
-				attributeStack.add(new Html('attribute here'));
+				getRallyType(typeName, function(type) {
+					attributeStack.add(new AttributeSpec(type));
+				});
 			}
-
-			// var type = getRallyType(typeName);
 		}
 
 		var typePicker = new TypePicker();

@@ -76,6 +76,15 @@
 	});
 };
 
+
+rsc.api.getRallyType = function(typeName, callback) {
+	Rally.data.ModelFactory.getModel({
+		type: typeName,
+		success: function(model) {
+			callback(rsc.Record.wrapModel(model));
+		}
+	})
+};
 Object.defineProperty(rsc.api, 'HomeTag', {
 	writable: false,
 	configurable: false,
@@ -170,7 +179,53 @@ rsc.api.Checkbox = function(label, checked) {
 
 	return proxy;
 };
-rsc.api.Flow = function(configOrChild, varargs) {
+(function() {
+	function buildStore(values) {
+		var data = [];
+		if (Ext.isObject(values)) {
+			Ext.Object.each(values, function(key, value) {
+				data.push({
+					name: key,
+					value: value
+				});
+			});
+		} else {
+			values = rsc.util.toArray(values);
+			Ext.Array.each(values, function(value) {
+				data.push({
+					name: value,
+					value: value
+				});
+			})
+		}
+
+		return Ext.create('Ext.data.Store', {
+			fields: ['name', 'value'],
+			data: data
+		});
+	}
+
+	rsc.api.Combobox = function(label, values) {
+		var proxy = new rsc.Proxy(function(container) {
+			this.cmp = container.add({
+				xtype: 'combobox',
+				queryMode: 'local',
+				fieldLabel: label,
+				displayField: 'name',
+				valueField: 'value',
+				store: buildStore(values)
+			});
+		});
+
+		proxy.defineEventProperties('select');
+
+		proxy.surfaceMethodsAsProperties({
+			getDisplayValue: 'value'
+		});
+
+		return proxy;
+	};
+})();rsc.api.Flow = function(configOrChild, varargs) {
 	var children = Ext.Array.toArray(arguments);
 	var config;
 
@@ -342,6 +397,19 @@ rsc.api.AddNew = function(types, ignoredFields) {
 	return proxy;
 };
 
+
+
+rsc.api.AttributeCombobox = function(type, attribute) {
+	var proxy = new rsc.Proxy(function(container) {
+		this.cmp = container.add({
+			xtype: 'rallyattributecombobox',
+			model: type,
+			field: attribute
+		});
+	});
+
+	return proxy;
+};
 
 rsc.api.Button = function(text) {
 	var proxy = new rsc.Proxy(function(container) {
@@ -740,6 +808,8 @@ rsc.Record.prototype = {
 };
 
 rsc.Record.wrap = function(records) {
+	var givenArray = Ext.isArray(records);
+
 	var wrapped = [];
 
 	records = rsc.util.toArray(records);
@@ -748,9 +818,42 @@ rsc.Record.wrap = function(records) {
 		wrapped.push(new rsc.Record(record));
 	});
 
-	return wrapped;
+	return givenArray ? wrapped : wrapped[0];
 };
-(function() {
+
+rsc.Record.wrapModel = function(model) {
+	var wrap = {};
+
+	Object.defineProperty(wrap, 'name', {
+		writable: false,
+		configurable: false,
+		enumerable: false,
+		value: model.displayName
+	});
+
+	Ext.Array.each(model.getFields(), function(field) {
+		Object.defineProperty(wrap, field.name, {
+			writable: false,
+			configurable: false,
+			enumerable: true,
+			value: field
+		})
+	});
+
+	wrap.getEditableAttributes = function() {
+		if (!this._editableAttributes) {
+			this._editableAttributes = {};
+			Ext.Array.each(model.getFields(), function(field) {
+				if (field.attributeDefinition && field.attributeDefinition.AttributeType !== 'COLLECTION') {
+					this._editableAttributes[field.name] = field;
+				}
+			}, this);
+		}
+		return this._editableAttributes;
+	};
+
+	return wrap;
+};(function() {
 	function patchSdk() {
 
 		// addnew is calling this, not available in RUI
