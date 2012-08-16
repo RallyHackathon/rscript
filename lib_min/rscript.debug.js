@@ -5,6 +5,17 @@
 	this.rsc.global = this;
 })();
 
+
+rsc.api.create = function(type, data, callback) {
+	Rally.data.ModelFactory.getModel({
+		type: type,
+		success: function(model) {
+			var record = new model(data);
+			record.save(callback);
+		}
+	});
+};
+
 (function() {
 	function createColumnBuilder(columns) {
 		columns = rsc.util.toArray(columns);
@@ -408,6 +419,10 @@ rsc.api.AttributeCombobox = function(type, attribute) {
 		});
 	});
 
+	proxy.surfaceMethodsAsProperties({
+		getDisplayValue: 'value'
+	});
+
 	return proxy;
 };
 
@@ -604,11 +619,12 @@ rsc.api.Stack = function(configOrChild, varargs) {
 		Ext.Array.each(proxies, function(proxy) {
 			proxy = rsc.util.stringToHtml(proxy);
 
-			if (!this.cmp) {
-				children.push(proxy);
-			} else {
+			if (this.cmp) {
 				proxy.resolve(this.cmp);
 			}
+			
+			children.push(proxy);
+
 		}, this);
 	};
 
@@ -618,11 +634,15 @@ rsc.api.Stack = function(configOrChild, varargs) {
 		Ext.Array.each(proxies, function(proxy) {
 			if (this.cmp) {
 				this.cmp.remove(proxy.cmp);
-			} else {
-				children = Ext.Array.remove(children, proxy);
-			}
+			} 
+			
+			children = Ext.Array.remove(children, proxy);
 		}, this);
-	}
+	};
+
+	proxy.each = function(callback) {
+		Ext.Array.each(children, callback);
+	};
 
 	return proxy;
 };

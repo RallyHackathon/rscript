@@ -41,7 +41,31 @@
 				flow.add(value);
 			}
 
+			Object.defineProperty(flow, 'attribute', {
+				get: function() {
+					return combo.value;
+				}
+			});
+
+			Object.defineProperty(flow, 'value', {
+				get: function() {
+					return value && value.value;
+				}
+			});
+
 			return flow;
+		}
+
+		function createArtifacts(typeName, attributeStack) {
+			var data = {};
+
+			attributeStack.each(function(attributeSpec) {
+				data[attributeSpec.attribute] = attributeSpec.value;
+			});
+
+			data.Name = 'dummy defect';
+
+			create(typeName, data);
 		}
 
 		function createArtifactUi(stack, typeName) {
@@ -56,7 +80,11 @@
 				getRallyType(typeName, function(type) {
 					attributeStack.add(new AttributeSpec(type));
 				});
-			}
+			};
+
+			goButton.click = function() {
+				createArtifacts(typeName, attributeStack);
+			};
 		}
 
 		var typePicker = new TypePicker();
@@ -64,7 +92,7 @@
 		typePicker.on('typechosen', function(type) {
 			stack.remove(typePicker);
 			createArtifactUi(stack, type);
-		})
+		});
 
 		launch(stack);
 	</script>
