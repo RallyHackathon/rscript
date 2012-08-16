@@ -320,6 +320,7 @@ rsc.api.Link = function(title, urlOrTag) {
 		return proxy;
 	}
 })();
+
 rsc.api.Page = function(tag, childrenOrUndefined) {
 	if(!Ext.isString(tag)) {
 		throw new Error("page() must give the page a tag, ie page('mytag', ....)");
@@ -793,16 +794,29 @@ rsc.Proxy.prototype = {
 	},
 
 	fireEvent: function(eventName, varargs) {
-		if(this.cmp) {
+		if (this.cmp) {
 			this.cmp.fireEvent.apply(this.cmp, arguments);
 		}
 	},
 
 	on: function(eventName, handler) {
-		if(this.cmp) {
+		if (this.cmp) {
 			this.cmp.on(eventName, handler);
 		} else {
 			this.pending[eventName] = handler;
+		}
+	},
+
+	renderTo: function(element) {
+		if (Ext.isString(element)) {
+			element = Ext.dom.Query.select(element)[0];
+		}
+
+		if (element) {
+			var container = Ext.widget('container', {
+				renderTo: element
+			});
+			this.resolve(container);
 		}
 	}
 };rsc.Record = function(extRecord) {

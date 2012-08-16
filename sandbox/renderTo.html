@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<title>rscript renderTo</title>
+	<script type="text/javascript" src="https://test1cluster.f4tech.com/apps/2.0p3/sdk-debug.js"></script>
+	<script type="text/javascript" src="../lib_min/rscript.debug.js"></script>
+
+	<script type="rscript">
+		var h = new Html(34, "hello rscript!");
+		var h2 = new Html('more html here');
+		var h3 = new Html('and yet some more');
+		var h4 = new Html('im over here');
+		var cb = new Checkbox('my checkbox', true);
+
+		cb.change = function(value) {
+			h4.html = 'changed to <b>' + value + '</b>';
+		}
+
+		var f = new Flow(new Stack(h, h2, h3), h4, 'string baby');
+
+		f.add('i was added later as a string');
+		f.renderTo('#renderToMePlease');
+	</script>
+
+</head>
+<body>
+	<div id="renderToMePlease"></div>
+</body>
+</html>
+
