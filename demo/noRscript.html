@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<style>
+		body {
+			margin: 10px !important;
+		}
+	</style>
+
+	<script type="text/javascript" src="https://test1cluster.f4tech.com/apps/2.0p3/sdk-debug.js"></script>
+	<script type="text/javascript" src="../lib_min/rscript.debug.js"></script>
+
+	<script type="text/javascript">
+		Rally.onReady(function() {
+			var combobox = new rsc.api.Combobox('Favorite Beer', ['Bud Light', 'Coors']);
+
+			combobox.select = function( ){
+				alert('your favorite beer is ' + combobox.value);
+			};
+
+			combobox.renderTo('#appGoesHere');
+		});
+	</script>
+
+</head>
+<body>
+	<div id="appGoesHere"></div>
+</body>
+</html>
+
+
